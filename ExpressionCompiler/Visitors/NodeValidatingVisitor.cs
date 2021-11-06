@@ -30,6 +30,16 @@ namespace ExpressionCompiler.Visitors
             return node;
         }
 
+        public Node VisitCInt(CIntFunctionNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Node VisitCString(CStringFunctionNode node)
+        {
+            throw new NotImplementedException();
+        }
+
         public Node VisitDate(DateFunctionNode node)
         {
             throw new NotImplementedException();

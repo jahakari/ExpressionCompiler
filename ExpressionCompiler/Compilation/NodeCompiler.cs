@@ -181,6 +181,50 @@ namespace ExpressionCompiler.Compilation
             il.Emit(Ceq);
         }
 
+        public Node VisitCInt(CIntFunctionNode node)
+        {
+            node.Argument.Accept(this);
+
+            switch (node.Argument.ValueType) {
+                case NodeValueType.Decimal:
+                case NodeValueType.Number:
+                    MethodInfo cast = TypeHelper.GetDecimalExplicitCastMethod(typeof(int));
+                    il.Emit(Call, cast);
+                    break;
+
+                case NodeValueType.String:
+                    MethodInfo parse = typeof(int).GetMethod(nameof(int.Parse), new[] { typeof(string) });
+                    il.Emit(Call, parse);
+
+                    break;
+            }
+
+            return node;
+        }
+
+        public Node VisitCString(CStringFunctionNode node)
+        {
+            node.Argument.Accept(this);
+
+            switch (node.Argument.ValueType) {
+                case NodeValueType.String:
+                    break;
+
+                default:
+                    Type type = GetNodeType(node.Argument);
+                    MethodInfo toString = type.GetMethod("ToString", Type.EmptyTypes);
+
+                    int loc = il.DeclareLocal(type).LocalIndex;
+                    il.Emit(Stloc, loc);
+                    il.Emit(Ldloca, loc);
+
+                    il.Emit(Call, toString);
+                    break;
+            }
+
+            return node;
+        }
+
         public Node VisitDate(DateFunctionNode node)
         {
             node.Year.Accept(this);
@@ -238,8 +282,8 @@ namespace ExpressionCompiler.Compilation
             int textLoc = il.DeclareLocal(typeof(string)).LocalIndex;
 
             node.Text.Accept(this);
+            il.Emit(Dup);
             il.Emit(Stloc, textLoc);
-            il.Emit(Ldloc, textLoc);
             il.Emit(Ldc_I4_0);
 
             node.Count.Accept(this);
@@ -358,9 +402,9 @@ namespace ExpressionCompiler.Compilation
             int lengthLoc = il.DeclareLocal(typeof(int)).LocalIndex;
 
             node.Text.Accept(this);
+            il.Emit(Dup);
             il.Emit(Stloc, textLoc);
 
-            il.Emit(Ldloc, textLoc);
             il.Emit(Call, TypeHelper.StringLengthGetter);
             il.Emit(Stloc, lengthLoc);
 
@@ -369,7 +413,7 @@ namespace ExpressionCompiler.Compilation
             il.Emit(Ldloc, textLoc);
             il.Emit(Ldloc, lengthLoc);
 
-            il.Emit(Ldloc, lengthLoc);
+            il.Emit(Dup);
             node.Count.Accept(this);
             EmitMin();
 

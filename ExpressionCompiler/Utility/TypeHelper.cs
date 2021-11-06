@@ -82,10 +82,15 @@ namespace ExpressionCompiler.Utility
 
         private static MethodInfo decimalToFloatExplicitCastMethod;
         public static MethodInfo DecimalToFloatExplicitCastMethod
-            => decimalToFloatExplicitCastMethod ??= typeof(decimal)
+            => decimalToFloatExplicitCastMethod ??= GetDecimalExplicitCastMethod(typeof(double));
+
+        public static MethodInfo GetDecimalExplicitCastMethod(Type returnType)
+        {
+            return typeof(decimal)
                 .GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .Where(m => m.Name == op_Explicit)
-                .First(m => m.ReturnType == typeof(double));
+                .First(m => m.ReturnType == returnType);
+        }
 
         private static MethodInfo GetDecimalOperatorMethod(string name)
             => typeof(decimal).GetMethod(name, BindingFlags.Public | BindingFlags.Static);

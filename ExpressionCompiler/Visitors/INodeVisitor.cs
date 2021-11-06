@@ -6,6 +6,8 @@ namespace ExpressionCompiler.Visitors
     {
         Node VisitAnd(AndFunctionNode node);
         Node VisitBinary(BinaryExpressionNode node);
+        Node VisitCInt(CIntFunctionNode node);
+        Node VisitCString(CStringFunctionNode node);
         Node VisitDate(DateFunctionNode node);
         Node VisitDay(DayFunctionNode node);
         Node VisitIdentifier(IdentifierNode node);

@@ -1,8 +1,10 @@
 ﻿using ExpressionCompiler.Compilation;
 using ExpressionCompiler.Nodes;
+using ExpressionCompiler.Tokenizing;
 using ExpressionCompiler.Utility;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace ExpressionCompiler
@@ -11,12 +13,12 @@ namespace ExpressionCompiler
     {
         static void Main(string[] args)
         {
-            var exp = new BinaryExpressionNode
-            (
-                left: new LiteralValueNode<int>(501),
-                @operator: new BinaryOperatorNode("%"),
-                right: new LiteralValueNode<int>(500)
-            );
+            //var exp = new BinaryExpressionNode
+            //(
+            //    left: new LiteralValueNode<int>(501),
+            //    @operator: new BinaryOperatorNode("%"),
+            //    right: new LiteralValueNode<int>(500)
+            //);
 
             //var exp = new LiteralValueNode<DateTime>(DateTime.Today);
 
@@ -44,7 +46,6 @@ namespace ExpressionCompiler
             //    new LiteralValueNode<decimal>(2.34m)
             //);
 
-            var ctx = new DummyDataContext();
             //Node exp = new BinaryExpressionNode
             //(
             //    new IdentifierNode("FOO", NodeValueType.Integer),
@@ -61,18 +62,31 @@ namespace ExpressionCompiler
             //    new LiteralValueNode<int>(19)
             //);
 
-            //Node exp = new RightFunctionNode
+            //Node exp = new LeftFunctionNode
             //(
-            //    new LiteralValueNode<string>("Hello, world!"),
-            //    new LiteralValueNode<int>(6)
+            //    new CStringFunctionNode(new LiteralValueNode<decimal>(1.2345m)),
+            //    new LiteralValueNode<int>(3)
             //);
 
-            var compiler = new NodeCompiler(exp);
+            //Node exp = new CIntFunctionNode
+            //(
+            //    new LiteralValueNode<decimal>(5.23m)
+            //);
 
-            MethodInfo mInfo = compiler.Compile();
-            var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
+            //var compiler = new NodeCompiler(exp);
 
-            Console.WriteLine(del.Invoke(ctx));
+            //MethodInfo mInfo = compiler.Compile();
+            //var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
+
+            //var ctx = new DummyDataContext();
+            //Console.WriteLine(del.Invoke(ctx));
+
+            string input = "1 + 2 * FOO / \"Hello\" ^ -1.23";
+            var tokens = new Tokenizer(input).Tokenize().ToArray();
+
+            foreach (var token in tokens) {
+                Console.WriteLine(token);
+            }
         }
     }
 }
