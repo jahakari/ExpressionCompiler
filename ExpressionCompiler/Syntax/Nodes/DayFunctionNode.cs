@@ -1,6 +1,6 @@
 ﻿using ExpressionCompiler.Visitors;
 
-namespace ExpressionCompiler.Nodes
+namespace ExpressionCompiler.Syntax.Nodes
 {
     public class DayFunctionNode : Node
     {

@@ -1,4 +1,4 @@
-﻿using ExpressionCompiler.Nodes;
+﻿using ExpressionCompiler.Syntax.Nodes;
 using ExpressionCompiler.Utility;
 using ExpressionCompiler.Visitors;
 using System;

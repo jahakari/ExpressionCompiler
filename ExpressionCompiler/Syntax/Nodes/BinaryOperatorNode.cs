@@ -2,7 +2,7 @@
 using ExpressionCompiler.Visitors;
 using System;
 
-namespace ExpressionCompiler.Nodes
+namespace ExpressionCompiler.Syntax.Nodes
 {
     public class BinaryOperatorNode : Node
     {

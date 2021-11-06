@@ -1,4 +1,4 @@
-﻿namespace ExpressionCompiler.Nodes
+﻿namespace ExpressionCompiler.Syntax.Nodes
 {
     public enum OperatorType
     {

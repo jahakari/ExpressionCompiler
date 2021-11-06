@@ -1,5 +1,5 @@
 ﻿using ExpressionCompiler.Compilation;
-using ExpressionCompiler.Nodes;
+using ExpressionCompiler.Syntax.Nodes;
 using ExpressionCompiler.Tokenizing;
 using ExpressionCompiler.Utility;
 using System;

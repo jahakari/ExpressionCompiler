@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ExpressionCompiler.Nodes
+namespace ExpressionCompiler.Syntax.Nodes
 {
     public class OrFunctionNode : Node
     {

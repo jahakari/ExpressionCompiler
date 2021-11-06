@@ -1,7 +1,7 @@
 ﻿using ExpressionCompiler.Visitors;
 using System;
 
-namespace ExpressionCompiler.Nodes
+namespace ExpressionCompiler.Syntax.Nodes
 {
     public sealed class LiteralValueNode<T> : LiteralValueNode
     {

@@ -1,4 +1,4 @@
-﻿using ExpressionCompiler.Nodes;
+﻿using ExpressionCompiler.Syntax.Nodes;
 using System;
 using System.Collections.Generic;
 

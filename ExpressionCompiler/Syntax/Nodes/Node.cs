@@ -1,7 +1,7 @@
 ﻿using ExpressionCompiler.Compilation;
 using ExpressionCompiler.Visitors;
 
-namespace ExpressionCompiler.Nodes
+namespace ExpressionCompiler.Syntax.Nodes
 {
     public abstract class Node
     {
