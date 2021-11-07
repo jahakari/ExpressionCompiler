@@ -44,6 +44,32 @@ namespace ExpressionCompiler.Compilation
             return module.GetMethod(methodName);
         }
 
+        public Node VisitAbs(AbsFunctionNode node)
+        {
+            Label endLabel = il.DefineLabel();
+            node.Argument.Accept(this);
+
+            il.Emit(Dup);
+
+            if (node.Argument.ValueType == NodeValueType.Integer) {
+                EmitInt32(0);
+                EmitGreaterThanOrEqual();
+                il.Emit(Brtrue, endLabel);
+
+                il.Emit(Neg);
+            } else {
+                EmitDecimal(0);
+                il.Emit(Call, TypeHelper.DecimalGreaterThanOrEqualMethod);
+                il.Emit(Brtrue, endLabel);
+
+                MethodInfo method = typeof(decimal).GetMethod("op_UnaryNegation");
+                il.Emit(Call, method);
+            }
+
+            il.MarkLabel(endLabel);
+            return node;
+        }
+
         public Node VisitAnd(AndFunctionNode node)
         {
             Label falseLabel = il.DefineLabel();
@@ -214,9 +240,9 @@ namespace ExpressionCompiler.Compilation
                     Type type = GetNodeType(node.Argument);
                     MethodInfo toString = type.GetMethod("ToString", Type.EmptyTypes);
 
-                    int loc = il.DeclareLocal(type).LocalIndex;
-                    il.Emit(Stloc, loc);
-                    il.Emit(Ldloca, loc);
+                    LocalBuilder value = il.DeclareLocal(type);
+                    il.Emit(Stloc, value);
+                    il.Emit(Ldloca, value);
 
                     il.Emit(Call, toString);
                     break;
@@ -238,6 +264,12 @@ namespace ExpressionCompiler.Compilation
         public Node VisitDay(DayFunctionNode node)
         {
             CompileDateProperty(node.Date, TypeHelper.DateTimeDayGetter);
+            return node;
+        }
+
+        public Node VisitGroup(GroupNode node)
+        {
+            node.Inner.Accept(this);
             return node;
         }
 
@@ -279,15 +311,15 @@ namespace ExpressionCompiler.Compilation
 
         public Node VisitLeft(LeftFunctionNode node)
         {
-            int textLoc = il.DeclareLocal(typeof(string)).LocalIndex;
+            LocalBuilder text = il.DeclareLocal(typeof(string));
 
             node.Text.Accept(this);
             il.Emit(Dup);
-            il.Emit(Stloc, textLoc);
+            il.Emit(Stloc, text);
             il.Emit(Ldc_I4_0);
 
             node.Count.Accept(this);
-            il.Emit(Ldloc, textLoc);
+            il.Emit(Ldloc, text);
             il.Emit(Call, TypeHelper.StringLengthGetter);
 
             EmitMin();
@@ -301,26 +333,26 @@ namespace ExpressionCompiler.Compilation
         /// </summary>
         private void EmitMin()
         {
-            int firstLoc = il.DeclareLocal(typeof(int)).LocalIndex;
-            int secondLoc = il.DeclareLocal(typeof(int)).LocalIndex;
+            LocalBuilder value1 = il.DeclareLocal(typeof(int));
+            LocalBuilder value2 = il.DeclareLocal(typeof(int));
 
             Label first = il.DefineLabel();
             Label end = il.DefineLabel();
 
-            il.Emit(Stloc, secondLoc);
-            il.Emit(Stloc, firstLoc);
+            il.Emit(Stloc, value2);
+            il.Emit(Stloc, value1);
 
-            il.Emit(Ldloc, firstLoc);
-            il.Emit(Ldloc, secondLoc);
+            il.Emit(Ldloc, value1);
+            il.Emit(Ldloc, value2);
 
             il.Emit(Clt);
             il.Emit(Brtrue, first);
 
-            il.Emit(Ldloc, secondLoc);
+            il.Emit(Ldloc, value2);
             il.Emit(Br, end);
 
             il.MarkLabel(first);
-            il.Emit(Ldloc, firstLoc);
+            il.Emit(Ldloc, value1);
 
             il.MarkLabel(end);
         }
@@ -375,6 +407,20 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
+        public Node VisitNegation(NegationNode node)
+        {
+            node.Operand.Accept(this);
+
+            if (node.ValueType == NodeValueType.Integer) {
+                il.Emit(Neg);
+            } else {
+                MethodInfo method = typeof(decimal).GetMethod("op_UnaryNegation");
+                il.Emit(Call, method);
+            }
+
+            return node;
+        }
+
         public Node VisitOr(OrFunctionNode node)
         {
             Label trueLabel = il.DefineLabel();
@@ -398,20 +444,20 @@ namespace ExpressionCompiler.Compilation
 
         public Node VisitRight(RightFunctionNode node)
         {
-            int textLoc = il.DeclareLocal(typeof(string)).LocalIndex;
-            int lengthLoc = il.DeclareLocal(typeof(int)).LocalIndex;
+            LocalBuilder text = il.DeclareLocal(typeof(string));
+            LocalBuilder length = il.DeclareLocal(typeof(int));
 
             node.Text.Accept(this);
             il.Emit(Dup);
-            il.Emit(Stloc, textLoc);
+            il.Emit(Stloc, text);
 
             il.Emit(Call, TypeHelper.StringLengthGetter);
-            il.Emit(Stloc, lengthLoc);
+            il.Emit(Stloc, length);
 
             // start index = stringLength - chars
 
-            il.Emit(Ldloc, textLoc);
-            il.Emit(Ldloc, lengthLoc);
+            il.Emit(Ldloc, text);
+            il.Emit(Ldloc, length);
 
             il.Emit(Dup);
             node.Count.Accept(this);
@@ -437,11 +483,11 @@ namespace ExpressionCompiler.Compilation
 
         private void CompileDateProperty(Node dateNode, MethodInfo getter)
         {
-            int dateLoc = il.DeclareLocal(typeof(DateTime)).LocalIndex;
+            LocalBuilder date = il.DeclareLocal(typeof(DateTime));
             dateNode.Accept(this);
 
-            il.Emit(Stloc, dateLoc);
-            il.Emit(Ldloca, dateLoc);
+            il.Emit(Stloc, date);
+            il.Emit(Ldloca, date);
             il.Emit(Call, getter);
         }
 

@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class YearFunctionNode : Node
+    public class YearFunctionNode : Node, IFunctionNode
     {
         public YearFunctionNode(Node date)
         {
@@ -15,9 +15,20 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public Node Date { get; }
 
+        public string FunctionName => "YEAR";
+
         public override Node Accept(INodeVisitor visitor)
             => visitor.VisitYear(this);
 
         public override string ToString() => $"YEAR({Date})";
+
+        public YearFunctionNode Update(Node date)
+        {
+            if (date == Date) {
+                return this;
+            }
+
+            return new YearFunctionNode(date);
+        }
     }
 }

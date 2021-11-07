@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class IfFunctionNode : Node
+    public class IfFunctionNode : Node, IFunctionNode
     {
         public IfFunctionNode(Node condition, Node ifTrue, Node ifFalse)
         {
@@ -19,10 +19,21 @@ namespace ExpressionCompiler.Syntax.Nodes
         public Node IfTrue { get; }
         public Node IfFalse { get; }
 
+        public string FunctionName => "IF";
+
         public override Node Accept(INodeVisitor visitor)
             => visitor.VisitIf(this);
 
         public override string ToString()
             => $"IF({Condition}, {IfTrue}, {IfFalse})";
+
+        public IfFunctionNode Update(Node condition, Node ifTrue, Node ifFalse)
+        {
+            if (condition == Condition && ifTrue == IfTrue && ifFalse == IfFalse) {
+                return this;
+            }
+
+            return new IfFunctionNode(condition, ifTrue, ifFalse);
+        }
     }
 }

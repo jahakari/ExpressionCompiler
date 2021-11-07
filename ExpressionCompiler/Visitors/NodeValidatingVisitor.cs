@@ -8,6 +8,11 @@ namespace ExpressionCompiler.Visitors
     {
         public List<string> Errors { get; } = new();
 
+        public Node VisitAbs(AbsFunctionNode node)
+        {
+            throw new NotImplementedException();
+        }
+
         public Node VisitAnd(AndFunctionNode node)
         {
             if (node.Arguments.Count < 2) {
@@ -56,6 +61,11 @@ namespace ExpressionCompiler.Visitors
             return node;
         }
 
+        public Node VisitGroup(GroupNode node)
+        {
+            throw new NotImplementedException();
+        }
+
         public Node VisitIdentifier(IdentifierNode node)
         {
             throw new NotImplementedException();
@@ -88,6 +98,11 @@ namespace ExpressionCompiler.Visitors
         public Node VisitLiteral(LiteralValueNode node) => node;
 
         public Node VisitMonth(MonthFunctionNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Node VisitNegation(NegationNode node)
         {
             throw new NotImplementedException();
         }

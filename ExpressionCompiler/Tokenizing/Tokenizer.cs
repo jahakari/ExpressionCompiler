@@ -9,14 +9,27 @@ namespace ExpressionCompiler.Tokenizing
     public class Tokenizer
     {
         private readonly Window<char> window;
+        private readonly bool skipWhitespace;
         private StringBuilder stringBuilder = new();
 
-        public Tokenizer(string input) => window = new Window<char>(input);
+        public Tokenizer(string input, bool skipWhitespace)
+        {
+            window = new Window<char>(input);
+            this.skipWhitespace = skipWhitespace;
+        }
+
+        public Tokenizer(string input) : this(input, false) { }
 
         public IEnumerable<Token> Tokenize()
         {
             while (window.HasItem) {
-                yield return GetToken();
+                Token t = GetToken();
+
+                if (skipWhitespace && IsWhitespace(t)) {
+                    continue;
+                }
+
+                yield return t;
             }
         }
 
@@ -193,5 +206,7 @@ namespace ExpressionCompiler.Tokenizing
 
         private bool IsWordCharacter(char c, params char[] additionalChars)
             => char.IsNumber(c) || char.IsLetter(c) || additionalChars.Contains(c);
+
+        private bool IsWhitespace(Token t) => t.Kind is Space or Newline or Tab;
     }
 }

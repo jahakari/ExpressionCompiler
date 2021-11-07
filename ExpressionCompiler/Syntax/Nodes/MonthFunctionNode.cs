@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class MonthFunctionNode : Node
+    public class MonthFunctionNode : Node, IFunctionNode
     {
         public MonthFunctionNode(Node date)
         {
@@ -15,9 +15,20 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public Node Date { get; }
 
+        public string FunctionName => "MONTH";
+
         public override Node Accept(INodeVisitor visitor)
             => visitor.VisitMonth(this);
 
         public override string ToString() => $"MONTH({Date})";
+
+        public MonthFunctionNode Update(Node date)
+        {
+            if (date == Date) {
+                return this;
+            }
+
+            return new MonthFunctionNode(date);
+        }
     }
 }

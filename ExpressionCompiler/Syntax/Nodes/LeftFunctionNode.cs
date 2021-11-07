@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class LeftFunctionNode : Node
+    public class LeftFunctionNode : Node, IFunctionNode
     {
         public LeftFunctionNode(Node text, Node count)
         {
@@ -17,9 +17,20 @@ namespace ExpressionCompiler.Syntax.Nodes
         public Node Text { get; }
         public Node Count { get; }
 
+        public string FunctionName => "LEFT";
+
         public override Node Accept(INodeVisitor visitor)
             => visitor.VisitLeft(this);
 
         public override string ToString() => $"LEFT({Text}, {Count})";
+
+        public LeftFunctionNode Update(Node text, Node count)
+        {
+            if (text == Text && count == Count) {
+                return this;
+            }
+
+            return new LeftFunctionNode(text, count);
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class AndFunctionNode : Node
+    public class AndFunctionNode : Node, IFunctionNode
     {
         public AndFunctionNode(IEnumerable<Node> arguments)
         {
@@ -17,9 +17,20 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public List<Node> Arguments { get; }
 
+        public string FunctionName => "AND";
+
         public override Node Accept(INodeVisitor visitor)
             => visitor.VisitAnd(this);
 
         public override string ToString() => $"AND({string.Join(", ", Arguments)})";
+
+        public AndFunctionNode Update(IEnumerable<Node> arguments)
+        {
+            if (arguments.SequenceEqual(Arguments)) {
+                return this;
+            }
+
+            return new AndFunctionNode(arguments);
+        }
     }
 }

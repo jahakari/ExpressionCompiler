@@ -73,20 +73,35 @@ namespace ExpressionCompiler
             //    new LiteralValueNode<decimal>(5.23m)
             //);
 
-            //var compiler = new NodeCompiler(exp);
+            Node exp = new AbsFunctionNode
+            (
+                new BinaryExpressionNode
+                (
+                    new LiteralValueNode<int>(5),
+                    new BinaryOperatorNode("-"),
+                    new BinaryExpressionNode
+                    (
+                        new LiteralValueNode<int>(4),
+                        new BinaryOperatorNode("^"),
+                        new LiteralValueNode<int>(3)
+                    )
+                )
+            );
 
-            //MethodInfo mInfo = compiler.Compile();
-            //var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
+            var compiler = new NodeCompiler(exp);
 
-            //var ctx = new DummyDataContext();
-            //Console.WriteLine(del.Invoke(ctx));
+            MethodInfo mInfo = compiler.Compile();
+            var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
 
-            string input = "1 + 2 * FOO / \"Hello\" ^ -1.23";
-            var tokens = new Tokenizer(input).Tokenize().ToArray();
+            var ctx = new DummyDataContext();
+            Console.WriteLine(del.Invoke(ctx));
 
-            foreach (var token in tokens) {
-                Console.WriteLine(token);
-            }
+            //string input = "1 + 2 * FOO / \"Hello\" ^ -1.23";
+            //var tokens = new Tokenizer(input).Tokenize().ToArray();
+
+            //foreach (var token in tokens) {
+            //    Console.WriteLine(token);
+            //}
         }
     }
 }

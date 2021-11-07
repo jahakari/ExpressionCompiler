@@ -2,11 +2,13 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class TodayFunctionNode : Node
+    public class TodayFunctionNode : Node, IFunctionNode
     {
         public override NodeType NodeType => NodeType.Function;
 
         public override NodeValueType ValueType => NodeValueType.Date;
+
+        public string FunctionName => "TODAY";
 
         public override Node Accept(INodeVisitor visitor)
             => visitor.VisitToday(this);

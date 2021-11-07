@@ -6,6 +6,9 @@
         BinaryOperator,
         Function,
         LiteralValue,
-        Identifier
+        Identifier,
+        Group,
+        Complex,
+        Negation
     }
 }
