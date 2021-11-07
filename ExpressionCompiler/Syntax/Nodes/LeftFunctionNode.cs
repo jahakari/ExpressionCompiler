@@ -19,7 +19,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string FunctionName => "LEFT";
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitLeft(this);
 
         public override string ToString() => $"LEFT({Text}, {Count})";

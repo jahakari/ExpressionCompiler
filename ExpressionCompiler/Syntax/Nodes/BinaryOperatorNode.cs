@@ -68,7 +68,7 @@ namespace ExpressionCompiler.Syntax.Nodes
             return OperatorType;
         }
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
         {
             throw new NotImplementedException();
         }

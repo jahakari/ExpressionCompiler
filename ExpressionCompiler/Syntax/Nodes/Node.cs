@@ -8,7 +8,7 @@ namespace ExpressionCompiler.Syntax.Nodes
         public abstract NodeType NodeType { get; }
         public abstract NodeValueType ValueType { get; }
 
-        public abstract Node Accept(INodeVisitor visitor);
+        public abstract Node Accept(NodeVisitor visitor);
         public abstract override string ToString();
     }
 }

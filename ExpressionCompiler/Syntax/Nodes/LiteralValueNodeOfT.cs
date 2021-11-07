@@ -31,7 +31,7 @@ namespace ExpressionCompiler.Syntax.Nodes
             };
         }
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitLiteral(this);
 
         public override string ToString()

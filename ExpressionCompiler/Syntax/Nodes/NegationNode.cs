@@ -15,7 +15,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public Node Operand { get; }
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitNegation(this);
 
         public override string ToString() => $"-{Operand}";

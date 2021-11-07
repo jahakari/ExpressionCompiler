@@ -17,7 +17,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string FunctionName => "DAY";
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitDay(this);
 
         public override string ToString() => $"DAY({Date})";

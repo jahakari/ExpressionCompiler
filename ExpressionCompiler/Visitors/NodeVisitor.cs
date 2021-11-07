@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Visitors
 {
-    public interface INodeVisitor
+    public interface NodeVisitor
     {
         Node VisitAbs(AbsFunctionNode node);
         Node VisitAnd(AndFunctionNode node);

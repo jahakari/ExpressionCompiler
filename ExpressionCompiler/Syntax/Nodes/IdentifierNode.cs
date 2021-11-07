@@ -19,7 +19,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string Identifier { get; }
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitIdentifier(this);
 
         public override string ToString() => Identifier;

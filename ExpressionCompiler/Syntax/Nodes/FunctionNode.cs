@@ -14,7 +14,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public override NodeValueType ValueType => NodeValueType.None;
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
         {
             throw new NotImplementedException();
         }

@@ -29,7 +29,7 @@ namespace ExpressionCompiler.Syntax.Nodes
         public BinaryOperatorNode Operator { get; }
         public Node Right { get; }
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitBinary(this);
 
         public override string ToString() => $"{Left} {Operator} {Right}";

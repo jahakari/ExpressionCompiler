@@ -20,7 +20,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string FunctionName => "OR";
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitOr(this);
 
         public override string ToString() => $"OR({string.Join(", ", Arguments)})";

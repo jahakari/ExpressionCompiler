@@ -8,7 +8,7 @@ using static System.Reflection.Emit.OpCodes;
 
 namespace ExpressionCompiler.Compilation
 {
-    public class NodeCompiler : INodeVisitor
+    public class NodeCompiler : NodeVisitor
     {
         private static ModuleBuilder module;
         private static int methodCount = 0;

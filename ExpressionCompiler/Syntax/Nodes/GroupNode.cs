@@ -16,7 +16,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public Node Inner { get; }
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
         {
             throw new NotImplementedException();
         }

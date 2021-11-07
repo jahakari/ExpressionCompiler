@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ExpressionCompiler.Visitors
 {
-    public class NodeValidatingVisitor : INodeVisitor
+    public class NodeValidatingVisitor : NodeVisitor
     {
         public List<string> Errors { get; } = new();
 

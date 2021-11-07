@@ -19,7 +19,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string FunctionName => "AND";
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitAnd(this);
 
         public override string ToString() => $"AND({string.Join(", ", Arguments)})";

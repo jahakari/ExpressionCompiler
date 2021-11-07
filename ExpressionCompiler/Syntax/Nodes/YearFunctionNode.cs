@@ -17,7 +17,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string FunctionName => "YEAR";
 
-        public override Node Accept(INodeVisitor visitor)
+        public override Node Accept(NodeVisitor visitor)
             => visitor.VisitYear(this);
 
         public override string ToString() => $"YEAR({Date})";
