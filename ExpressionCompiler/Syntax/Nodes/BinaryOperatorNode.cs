@@ -68,10 +68,7 @@ namespace ExpressionCompiler.Syntax.Nodes
             return OperatorType;
         }
 
-        public override Node Accept(NodeVisitor visitor)
-        {
-            throw new NotImplementedException();
-        }
+        public override Node Accept(NodeVisitor visitor) => this;
 
         public override string ToString() => Operator;
     }

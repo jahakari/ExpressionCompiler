@@ -44,7 +44,7 @@ namespace ExpressionCompiler.Compilation
             return module.GetMethod(methodName);
         }
 
-        public Node VisitAbs(AbsFunctionNode node)
+        public override Node VisitAbs(AbsFunctionNode node)
         {
             Label endLabel = il.DefineLabel();
             node.Argument.Accept(this);
@@ -70,7 +70,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitAnd(AndFunctionNode node)
+        public override Node VisitAnd(AndFunctionNode node)
         {
             Label falseLabel = il.DefineLabel();
             Label endLabel = il.DefineLabel();
@@ -91,12 +91,8 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitBinary(BinaryExpressionNode node)
+        public override Node VisitBinary(BinaryExpressionNode node)
         {
-            if (TryCompileToConstant(node)) {
-                return node;
-            }
-
             if (node.Operator.OperatorType == OperatorType.Exponent) {
                 CompileExponent(node);
                 return node;
@@ -207,7 +203,7 @@ namespace ExpressionCompiler.Compilation
             il.Emit(Ceq);
         }
 
-        public Node VisitCInt(CIntFunctionNode node)
+        public override Node VisitCInt(CIntFunctionNode node)
         {
             node.Argument.Accept(this);
 
@@ -228,7 +224,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitCString(CStringFunctionNode node)
+        public override Node VisitCString(CStringFunctionNode node)
         {
             node.Argument.Accept(this);
 
@@ -251,7 +247,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitDate(DateFunctionNode node)
+        public override Node VisitDate(DateFunctionNode node)
         {
             node.Year.Accept(this);
             node.Month.Accept(this);
@@ -261,19 +257,19 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitDay(DayFunctionNode node)
+        public override Node VisitDay(DayFunctionNode node)
         {
             CompileDateProperty(node.Date, TypeHelper.DateTimeDayGetter);
             return node;
         }
 
-        public Node VisitGroup(GroupNode node)
+        public override Node VisitGroup(GroupNode node)
         {
             node.Inner.Accept(this);
             return node;
         }
 
-        public Node VisitIdentifier(IdentifierNode node)
+        public override Node VisitIdentifier(IdentifierNode node)
         {
             MethodInfo method = node.ValueType switch
             {
@@ -291,7 +287,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitIf(IfFunctionNode node)
+        public override Node VisitIf(IfFunctionNode node)
         {
             Label falseLabel = il.DefineLabel();
             Label end = il.DefineLabel();
@@ -309,7 +305,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitLeft(LeftFunctionNode node)
+        public override Node VisitLeft(LeftFunctionNode node)
         {
             LocalBuilder text = il.DeclareLocal(typeof(string));
 
@@ -357,7 +353,7 @@ namespace ExpressionCompiler.Compilation
             il.MarkLabel(end);
         }
 
-        public Node VisitLiteral(LiteralValueNode node)
+        public override Node VisitLiteral(LiteralValueNode node)
         {
             switch (node.ValueType) {
                 case NodeValueType.Boolean:
@@ -401,13 +397,13 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitMonth(MonthFunctionNode node)
+        public override Node VisitMonth(MonthFunctionNode node)
         {
             CompileDateProperty(node.Date, TypeHelper.DateTimeMonthGetter);
             return node;
         }
 
-        public Node VisitNegation(NegationNode node)
+        public override Node VisitNegation(NegationNode node)
         {
             node.Operand.Accept(this);
 
@@ -421,7 +417,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitOr(OrFunctionNode node)
+        public override Node VisitOr(OrFunctionNode node)
         {
             Label trueLabel = il.DefineLabel();
             Label endLabel = il.DefineLabel();
@@ -442,7 +438,7 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitRight(RightFunctionNode node)
+        public override Node VisitRight(RightFunctionNode node)
         {
             LocalBuilder text = il.DeclareLocal(typeof(string));
             LocalBuilder length = il.DeclareLocal(typeof(int));
@@ -469,13 +465,13 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        public Node VisitToday(TodayFunctionNode node)
+        public override Node VisitToday(TodayFunctionNode node)
         {
             il.Emit(Call, TypeHelper.DateTimeTodayGetter);
             return node;
         }
 
-        public Node VisitYear(YearFunctionNode node)
+        public override Node VisitYear(YearFunctionNode node)
         {
             CompileDateProperty(node.Date, TypeHelper.DateTimeYearGetter);
             return node;
@@ -503,74 +499,6 @@ namespace ExpressionCompiler.Compilation
                 NodeValueType.String  => typeof(string),
                 _                     => throw new InvalidOperationException($"Node value type '{node.ValueType}' is not supported.")
             };
-        }
-
-        private bool TryCompileToConstant(BinaryExpressionNode node)
-        {
-            if (node.Left is not LiteralValueNode || node.Right is not LiteralValueNode) {
-                return false;
-            }
-
-            if (node.Left is LiteralValueNode<int> left && node.Right is LiteralValueNode<int> right) {
-                unchecked {
-                    switch (node.Operator.OperatorType) {
-                        case OperatorType.Add:
-                            EmitInt32(left.Value + right.Value);
-                            break;
-
-                        case OperatorType.Subtract:
-                            EmitInt32(left.Value - right.Value);
-                            break;
-
-                        case OperatorType.Multiply:
-                            EmitInt32(left.Value * right.Value);
-                            break;
-
-                        case OperatorType.Divide:
-                            EmitInt32(left.Value / right.Value);
-                            break;
-
-                        case OperatorType.Modulo:
-                            EmitInt32(left.Value % right.Value);
-                            break;
-
-                        case OperatorType.Exponent:
-                            EmitInt32((int)Math.Pow(left.Value, right.Value));
-                            break;
-
-                        case OperatorType.Equal:
-                            EmitBoolean(left.Value == right.Value);
-                            break;
-
-                        case OperatorType.NotEqual:
-                            EmitBoolean(left.Value != right.Value);
-                            break;
-
-                        case OperatorType.LessThan:
-                            EmitBoolean(left.Value < right.Value);
-                            break;
-
-                        case OperatorType.LessThanOrEqual:
-                            EmitBoolean(left.Value <= right.Value);
-                            break;
-
-                        case OperatorType.GreaterThan:
-                            EmitBoolean(left.Value > right.Value);
-                            break;
-
-                        case OperatorType.GreaterThanOrEqual:
-                            EmitBoolean(left.Value >= right.Value);
-                            break;
-
-                        default:
-                            return false;
-                    }
-
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private void EmitInt32(int value)

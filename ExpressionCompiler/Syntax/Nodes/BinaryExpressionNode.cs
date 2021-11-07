@@ -1,5 +1,4 @@
-﻿using ExpressionCompiler.Compilation;
-using ExpressionCompiler.Visitors;
+﻿using ExpressionCompiler.Visitors;
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
@@ -29,9 +28,17 @@ namespace ExpressionCompiler.Syntax.Nodes
         public BinaryOperatorNode Operator { get; }
         public Node Right { get; }
 
-        public override Node Accept(NodeVisitor visitor)
-            => visitor.VisitBinary(this);
+        public override Node Accept(NodeVisitor visitor) => visitor.VisitBinary(this);
 
         public override string ToString() => $"{Left} {Operator} {Right}";
+
+        public BinaryExpressionNode Update(Node left, Node right)
+        {
+            if (left == Left && right == Right) {
+                return this;
+            }
+
+            return new BinaryExpressionNode(left, Operator, right);
+        }
     }
 }

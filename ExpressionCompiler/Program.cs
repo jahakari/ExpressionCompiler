@@ -95,13 +95,6 @@ namespace ExpressionCompiler
 
             var ctx = new DummyDataContext();
             Console.WriteLine(del.Invoke(ctx));
-
-            //string input = "1 + 2 * FOO / \"Hello\" ^ -1.23";
-            //var tokens = new Tokenizer(input).Tokenize().ToArray();
-
-            //foreach (var token in tokens) {
-            //    Console.WriteLine(token);
-            //}
         }
     }
 }
