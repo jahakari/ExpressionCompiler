@@ -1,5 +1,4 @@
-﻿using ExpressionCompiler.Compilation;
-using ExpressionCompiler.Visitors;
+﻿using ExpressionCompiler.Visitors;
 using System;
 
 namespace ExpressionCompiler.Syntax.Nodes
@@ -10,9 +9,9 @@ namespace ExpressionCompiler.Syntax.Nodes
         {
             Operator = @operator;
             OperatorType = GetOperatorType(@operator);
-            OperatorSubType = GetOperatorSubType(OperatorType);
+            OperatorCategory = GetOperatorCategory(OperatorType);
 
-            if (OperatorSubType == OperatorType.Math) {
+            if (OperatorCategory == OperatorType.Math) {
                 MathOperatorSubType = GetMathOperatorSubType(OperatorType); 
             }
         }
@@ -22,7 +21,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public string Operator { get; }
         public OperatorType OperatorType { get; }
-        public OperatorType OperatorSubType { get; }
+        public OperatorType OperatorCategory { get; }
         public OperatorType MathOperatorSubType { get; } = OperatorType.None;
 
         private OperatorType GetOperatorType(string @operator)
@@ -46,7 +45,7 @@ namespace ExpressionCompiler.Syntax.Nodes
             };
         }
 
-        private OperatorType GetOperatorSubType(OperatorType operatorType)
+        private OperatorType GetOperatorCategory(OperatorType operatorType)
         {
             if ((OperatorType.Math & operatorType) == operatorType) {
                 return OperatorType.Math;

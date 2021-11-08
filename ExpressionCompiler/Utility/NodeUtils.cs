@@ -43,7 +43,7 @@ namespace ExpressionCompiler.Utility
             {
                 OperatorType.Add      => i1 + i2,
                 OperatorType.Subtract => i1 - i2,
-                OperatorType.Multiply => i1 - i2,
+                OperatorType.Multiply => i1 * i2,
                 OperatorType.Divide   => i1 / i2,
                 OperatorType.Modulo   => i1 % i2,
                 OperatorType.Exponent => (int)Math.Pow(i1, i2),
@@ -57,7 +57,7 @@ namespace ExpressionCompiler.Utility
             {
                 OperatorType.Add      => d1 + d2,
                 OperatorType.Subtract => d1 - d2,
-                OperatorType.Multiply => d1 - d2,
+                OperatorType.Multiply => d1 * d2,
                 OperatorType.Divide   => d1 / d2,
                 OperatorType.Modulo   => d1 % d2,
                 OperatorType.Exponent => (decimal)Math.Pow((double)d1, (double)d2),

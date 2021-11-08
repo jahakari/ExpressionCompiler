@@ -1,7 +1,9 @@
 ﻿using ExpressionCompiler.Compilation;
+using ExpressionCompiler.Syntax;
 using ExpressionCompiler.Syntax.Nodes;
 using ExpressionCompiler.Tokenizing;
 using ExpressionCompiler.Utility;
+using ExpressionCompiler.Visitors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,28 +75,38 @@ namespace ExpressionCompiler
             //    new LiteralValueNode<decimal>(5.23m)
             //);
 
-            Node exp = new AbsFunctionNode
-            (
-                new BinaryExpressionNode
-                (
-                    new LiteralValueNode<int>(5),
-                    new BinaryOperatorNode("-"),
-                    new BinaryExpressionNode
-                    (
-                        new LiteralValueNode<int>(4),
-                        new BinaryOperatorNode("^"),
-                        new LiteralValueNode<int>(3)
-                    )
-                )
-            );
+            //Node exp = new AbsFunctionNode
+            //(
+            //    new BinaryExpressionNode
+            //    (
+            //        new LiteralValueNode<int>(5),
+            //        new BinaryOperatorNode("-"),
+            //        new BinaryExpressionNode
+            //        (
+            //            new LiteralValueNode<int>(4),
+            //            new BinaryOperatorNode("^"),
+            //            new LiteralValueNode<int>(3)
+            //        )
+            //    )
+            //);
 
-            var compiler = new NodeCompiler(exp);
+            string input = "1 + 2 ^ 3 * 4";
+            var result = new SyntaxParser().Parse(input);
 
-            MethodInfo mInfo = compiler.Compile();
-            var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
+            if (result.ParseSuccessful) {
+                var rewriter = new NodeRewritingVisitor();
+                Node node = result.ParsedNode.Accept(rewriter);
+            } else {
+                Console.WriteLine(result.Error);
+            }
 
-            var ctx = new DummyDataContext();
-            Console.WriteLine(del.Invoke(ctx));
+            //var compiler = new NodeCompiler(exp);
+
+            //MethodInfo mInfo = compiler.Compile();
+            //var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
+
+            //var ctx = new DummyDataContext();
+            //Console.WriteLine(del.Invoke(ctx));
         }
     }
 }

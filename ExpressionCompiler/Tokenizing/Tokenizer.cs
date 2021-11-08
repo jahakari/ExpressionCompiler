@@ -128,7 +128,8 @@ namespace ExpressionCompiler.Tokenizing
                         return ScanWord();
                     }
 
-                    return new Token(Unknown, c);
+                    kind = Unknown;
+                    break;
             }
 
             window.Advance();

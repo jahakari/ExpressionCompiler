@@ -16,7 +16,7 @@ namespace ExpressionCompiler.Syntax.Nodes
         {
             get
             {
-                if (Operator.OperatorSubType == OperatorType.Boolean) {
+                if (Operator.OperatorCategory == OperatorType.Boolean) {
                     return NodeValueType.Boolean;
                 }
 

@@ -1,5 +1,4 @@
 ﻿using ExpressionCompiler.Visitors;
-using System;
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
@@ -17,9 +16,7 @@ namespace ExpressionCompiler.Syntax.Nodes
         public Node Inner { get; }
 
         public override Node Accept(NodeVisitor visitor)
-        {
-            throw new NotImplementedException();
-        }
+            => visitor.VisitGroup(this);
 
         public override string ToString() => $"({Inner})";
 
