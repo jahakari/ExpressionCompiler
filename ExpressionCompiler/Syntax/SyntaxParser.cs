@@ -9,6 +9,7 @@ namespace ExpressionCompiler.Syntax
     public class SyntaxParser
     {
         private Window<Token> window;
+        private readonly IFunctionContext functionContext = FunctionContext.Instance;
 
         public ParseResult Parse(string input)
         {
@@ -59,7 +60,7 @@ namespace ExpressionCompiler.Syntax
                     node = new GroupNode(node);
 
                     break;
-                
+
                 case TokenKind.Word:
                     switch (t.Value) {
                         case "TRUE":
@@ -71,13 +72,26 @@ namespace ExpressionCompiler.Syntax
                             break;
 
                         default:
+                            if (functionContext.IsFunction(t.Value)) {
+                                window.Advance();
+
+                                if (!TryParseFunctionArguments(t.Value, out List<Node> arguments, out error)) {
+                                    return false;
+                                }
+
+                                node = new FunctionNode(t.Value, arguments);
+                                break;
+                            }
+
+
                             break;
                     }
                     break;
                 case TokenKind.String:
                     if (DateTime.TryParse(t.Value, out DateTime date)) {
                         node = new LiteralValueNode<DateTime>(date);
-                    } else {
+                    }
+                    else {
                         node = new LiteralValueNode<string>(t.Value);
                     }
 
@@ -162,6 +176,40 @@ namespace ExpressionCompiler.Syntax
             }
 
             op = new BinaryOperatorNode(opValue);
+            return true;
+        }
+
+        private bool TryParseFunctionArguments(string functionName, out List<Node> arguments, out string error)
+        {
+            arguments = null;
+            error = null;
+
+            if (window.Current.Kind != TokenKind.LParen) {
+                error = $"Error parsing '{functionName}' function; expected '(' before arguments";
+                return false;
+            }
+
+            window.Advance();
+            var args = new List<Node>();
+
+            while (window.HasItem && window.Current.Kind != TokenKind.RParen) {
+                if (!TryParseNode(parseComplex: true, out Node node, out error)) {
+                    return false;
+                }
+
+                args.Add(node);
+
+                if (window.Current.Kind == TokenKind.Comma) {
+                    window.Advance();
+                }
+            }
+
+            if (window.Current.Kind != TokenKind.RParen) {
+                error = $"Error parsing '{functionName}' function; expected ')' after arguments";
+                return false;
+            }
+
+            arguments = args;
             return true;
         }
     }

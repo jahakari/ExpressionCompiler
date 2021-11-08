@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class OrFunctionNode : Node, IFunctionNode
+    public class OrFunctionNode : Node
     {
         public OrFunctionNode(IEnumerable<Node> arguments)
         {
@@ -17,8 +17,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public override NodeValueType ValueType => NodeValueType.Boolean;
 
         public List<Node> Arguments { get; }
-
-        public string FunctionName => "OR";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitOr(this);

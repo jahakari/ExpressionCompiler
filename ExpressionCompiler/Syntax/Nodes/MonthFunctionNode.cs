@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class MonthFunctionNode : Node, IFunctionNode
+    public class MonthFunctionNode : Node
     {
         public MonthFunctionNode(Node date)
         {
@@ -14,8 +14,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public override NodeValueType ValueType => NodeValueType.Integer;
 
         public Node Date { get; }
-
-        public string FunctionName => "MONTH";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitMonth(this);

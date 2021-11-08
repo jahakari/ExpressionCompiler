@@ -29,7 +29,7 @@ namespace ExpressionCompiler.Compilation
         {
             this.node = node;
 
-            Type returnType = GetNodeType(node);
+            Type returnType = NodeUtils.GetNodeType(node);
             methodName = $"Dynamic_Method_{++methodCount}";
             methodBuilder = module.DefineGlobalMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, new[] { typeof(IIdentifierDataContext)} );
             il = methodBuilder.GetILGenerator();
@@ -233,7 +233,7 @@ namespace ExpressionCompiler.Compilation
                     break;
 
                 default:
-                    Type type = GetNodeType(node.Argument);
+                    Type type = NodeUtils.GetNodeType(node.Argument);
                     MethodInfo toString = type.GetMethod("ToString", Type.EmptyTypes);
 
                     LocalBuilder value = il.DeclareLocal(type);
@@ -485,20 +485,6 @@ namespace ExpressionCompiler.Compilation
             il.Emit(Stloc, date);
             il.Emit(Ldloca, date);
             il.Emit(Call, getter);
-        }
-
-        private Type GetNodeType(Node node)
-        {
-            return node.ValueType switch
-            {
-                NodeValueType.Boolean => typeof(bool),
-                NodeValueType.Integer => typeof(int),
-                NodeValueType.Decimal => typeof(decimal),
-                NodeValueType.Number  => typeof(decimal),
-                NodeValueType.Date    => typeof(DateTime),
-                NodeValueType.String  => typeof(string),
-                _                     => throw new InvalidOperationException($"Node value type '{node.ValueType}' is not supported.")
-            };
         }
 
         private void EmitInt32(int value)

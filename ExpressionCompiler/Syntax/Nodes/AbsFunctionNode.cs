@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class AbsFunctionNode : Node, IFunctionNode
+    public class AbsFunctionNode : Node
     {
         public AbsFunctionNode(Node argument)
         {
@@ -14,8 +14,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public override NodeValueType ValueType => Argument.ValueType;
 
         public Node Argument { get; }
-
-        public string FunctionName => "ABS";
 
         public override Node Accept(NodeVisitor visitor)
              => visitor.VisitAbs(this);

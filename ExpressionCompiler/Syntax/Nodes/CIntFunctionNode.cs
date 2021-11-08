@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class CIntFunctionNode : Node, IFunctionNode
+    public class CIntFunctionNode : Node
     {
         public CIntFunctionNode(Node argument)
         {
@@ -14,8 +14,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public override NodeValueType ValueType => NodeValueType.Integer;
 
         public Node Argument { get; }
-
-        public string FunctionName => "CINT";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitCInt(this);

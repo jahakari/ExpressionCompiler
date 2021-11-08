@@ -3,7 +3,7 @@ using System;
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class DateFunctionNode : Node, IFunctionNode
+    public class DateFunctionNode : Node
     {
         public DateFunctionNode(Node year, Node month, Node day)
         {
@@ -19,8 +19,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public Node Year { get; }
         public Node Month { get; }
         public Node Day { get; }
-
-        public string FunctionName => "DATE";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitDate(this);

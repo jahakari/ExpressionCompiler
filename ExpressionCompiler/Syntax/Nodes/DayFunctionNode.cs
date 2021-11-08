@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class DayFunctionNode : Node, IFunctionNode
+    public class DayFunctionNode : Node
     {
         public DayFunctionNode(Node date)
         {
@@ -14,8 +14,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public override NodeValueType ValueType => NodeValueType.Integer;
 
         public Node Date { get; }
-
-        public string FunctionName => "DAY";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitDay(this);

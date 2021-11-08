@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class CStringFunctionNode : Node, IFunctionNode
+    public class CStringFunctionNode : Node
     {
         public CStringFunctionNode(Node argument)
         {
@@ -14,8 +14,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public override NodeValueType ValueType => NodeValueType.String;
 
         public Node Argument { get; }
-
-        public string FunctionName => "CSTRING";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitCString(this);

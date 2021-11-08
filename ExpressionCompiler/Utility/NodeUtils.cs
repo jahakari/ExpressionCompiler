@@ -100,7 +100,7 @@ namespace ExpressionCompiler.Utility
             }
 
             /*
-             We want to ensure that this operator represents a single type of operation (Add, Subtract, etc.), and not a category (AddOrSubtract, Math, etc.).
+             We want to ensure that this operator represents a single type of operation (Add, Subtract, etc.), and not a SubType or category (AddOrSubtract, Math, etc.).
              
              OperatorType.Multiply     = 0100 (4)
              OperatorType.Multiply - 1 = 0011 (3)
@@ -138,6 +138,20 @@ namespace ExpressionCompiler.Utility
             }
 
             return type;
+        }
+
+        public static Type GetNodeType(Node node)
+        {
+            return node.ValueType switch
+            {
+                NodeValueType.Boolean => typeof(bool),
+                NodeValueType.Integer => typeof(int),
+                NodeValueType.Decimal => typeof(decimal),
+                NodeValueType.Number => typeof(decimal),
+                NodeValueType.Date => typeof(DateTime),
+                NodeValueType.String => typeof(string),
+                _ => throw new InvalidOperationException($"Node value type '{node.ValueType}' is not supported.")
+            };
         }
     }
 }

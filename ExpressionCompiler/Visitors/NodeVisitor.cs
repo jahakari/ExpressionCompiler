@@ -47,6 +47,12 @@ namespace ExpressionCompiler.Visitors
         public virtual Node VisitDay(DayFunctionNode node)
             => node.Update(node.Date.Accept(this));
 
+        public virtual Node VisitFunction(FunctionNode node)
+        {
+            IEnumerable<Node> args = node.Arguments.Select(a => a.Accept(this));
+            return node.Update(args);
+        }
+
         public virtual Node VisitGroup(GroupNode node)
             => node.Update(node.Inner.Accept(this));
 

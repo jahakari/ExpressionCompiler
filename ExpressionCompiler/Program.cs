@@ -90,23 +90,28 @@ namespace ExpressionCompiler
             //    )
             //);
 
-            string input = "1 + 2 ^ 3 * 4";
+            //string input = "(2 * (2 + 3)) ^ 2 * 4";
+            string input = "IF(AND(1 < 2, 4 > 3), 3, 4)";
             var result = new SyntaxParser().Parse(input);
 
             if (result.ParseSuccessful) {
+                var functionBuilder = new FunctionBuildingVisitor();
+                Node node = result.ParsedNode.Accept(functionBuilder);
+
                 var rewriter = new NodeRewritingVisitor();
-                Node node = result.ParsedNode.Accept(rewriter);
-            } else {
+                node = node.Accept(rewriter);
+
+                var compiler = new NodeCompiler(node);
+
+                MethodInfo mInfo = compiler.Compile();
+                var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
+
+                var ctx = new DummyDataContext();
+                Console.WriteLine(del.Invoke(ctx));
+            }
+            else {
                 Console.WriteLine(result.Error);
             }
-
-            //var compiler = new NodeCompiler(exp);
-
-            //MethodInfo mInfo = compiler.Compile();
-            //var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
-
-            //var ctx = new DummyDataContext();
-            //Console.WriteLine(del.Invoke(ctx));
         }
     }
 }

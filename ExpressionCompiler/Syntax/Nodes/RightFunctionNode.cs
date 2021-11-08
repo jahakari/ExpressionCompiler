@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class RightFunctionNode : Node, IFunctionNode
+    public class RightFunctionNode : Node
     {
         public RightFunctionNode(Node text, Node count)
         {
@@ -16,8 +16,6 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public Node Text { get; }
         public Node Count { get; }
-
-        public string FunctionName => "RIGHT";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitRight(this);

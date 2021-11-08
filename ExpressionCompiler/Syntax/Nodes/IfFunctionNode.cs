@@ -2,7 +2,7 @@
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
-    public class IfFunctionNode : Node, IFunctionNode
+    public class IfFunctionNode : Node
     {
         public IfFunctionNode(Node condition, Node ifTrue, Node ifFalse)
         {
@@ -18,8 +18,6 @@ namespace ExpressionCompiler.Syntax.Nodes
         public Node Condition { get; }
         public Node IfTrue { get; }
         public Node IfFalse { get; }
-
-        public string FunctionName => "IF";
 
         public override Node Accept(NodeVisitor visitor)
             => visitor.VisitIf(this);
