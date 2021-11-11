@@ -91,8 +91,5 @@ namespace ExpressionCompiler.Visitors
                 return output.Reverse();
             }
         }
-
-        public override Node VisitGroup(GroupNode node)
-            => node.Inner.Accept(this);
     }
 }

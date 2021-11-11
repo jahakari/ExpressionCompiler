@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace ExpressionCompiler.Utility
 {
@@ -93,6 +94,9 @@ namespace ExpressionCompiler.Utility
             };
         }
 
+        public static bool IsMathOperator(BinaryOperatorNode node)
+            => IsMathOperator(node.OperatorType);
+
         public static bool IsMathOperator(OperatorType @operator)
         {
             if ((OperatorType.Math & @operator) != @operator) {
@@ -109,6 +113,9 @@ namespace ExpressionCompiler.Utility
              */
             return (@operator & (@operator - 1)) == 0;
         }
+
+        public static bool IsBooleanOperator(BinaryOperatorNode node)
+            => IsBooleanOperator(node.OperatorType);
 
         public static bool IsBooleanOperator(OperatorType @operator)
         {
@@ -152,6 +159,32 @@ namespace ExpressionCompiler.Utility
                 NodeValueType.String => typeof(string),
                 _ => throw new InvalidOperationException($"Node value type '{node.ValueType}' is not supported.")
             };
+        }
+
+        public static bool IsNumber(Node node)
+            => IsNumber(node.ValueType);
+
+        public static bool IsNumber(NodeValueType valueType)
+            => (NodeValueType.Number & valueType) == valueType;
+
+        public static bool CanCompare(Node node1, Node node2, BinaryOperatorNode op)
+        {
+            NodeValueType commonType = GetCommonDataType(node1, node2);
+
+            switch (commonType) {
+                case NodeValueType.Boolean:
+                case NodeValueType.String:
+                    return op.OperatorType is OperatorType.Equal or OperatorType.NotEqual;
+
+                case NodeValueType.Integer:
+                case NodeValueType.Decimal:
+                case NodeValueType.Number:
+                case NodeValueType.Date:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
     }
 }

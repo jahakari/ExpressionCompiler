@@ -1,4 +1,5 @@
 ﻿using ExpressionCompiler.Compilation;
+using ExpressionCompiler.Evaluation;
 using ExpressionCompiler.Syntax;
 using ExpressionCompiler.Syntax.Nodes;
 using ExpressionCompiler.Tokenizing;
@@ -15,102 +16,29 @@ namespace ExpressionCompiler
     {
         static void Main(string[] args)
         {
-            //var exp = new BinaryExpressionNode
-            //(
-            //    left: new LiteralValueNode<int>(501),
-            //    @operator: new BinaryOperatorNode("%"),
-            //    right: new LiteralValueNode<int>(500)
-            //);
+            var evaluator = new ExpressionEvaluator();
 
-            //var exp = new LiteralValueNode<DateTime>(DateTime.Today);
+            while (true) {
+                Console.WriteLine("Enter an expression to evaluate, or 'q' to quit:");
 
-            //Node exp = new BinaryExpressionNode
-            //(
-            //    new MonthFunctionNode(new LiteralValueNode<DateTime>(DateTime.Today)),
-            //    new BinaryOperatorNode("+"),
-            //    new LiteralValueNode<int>(10)
-            //);
+                string input = Console.ReadLine();
 
-            //Node exp = new OrFunctionNode
-            //(
-            //    new List<Node>
-            //    {
-            //        new LiteralValueNode<bool>(false),
-            //        new LiteralValueNode<bool>(false),
-            //        new LiteralValueNode<bool>(false)
-            //    }
-            //);
+                if (input.ToLower() == "q") {
+                    break;
+                }
 
-            //Node exp = new BinaryExpressionNode
-            //(
-            //    new LiteralValueNode<decimal>(2.23m),
-            //    new BinaryOperatorNode("^"),
-            //    new LiteralValueNode<decimal>(2.34m)
-            //);
+                Console.WriteLine();
 
-            //Node exp = new BinaryExpressionNode
-            //(
-            //    new IdentifierNode("FOO", NodeValueType.Integer),
-            //    new BinaryOperatorNode("*"),
-            //    new LiteralValueNode<int>(3)
-            //);
+                if (evaluator.TryEvaluate(input, out object result, out List<string> errors)) {
+                    Console.WriteLine(result);
+                }
+                else {
+                    foreach (var error in errors) {
+                        Console.WriteLine(error);
+                    }
+                }
 
-            //Node exp = new DayFunctionNode(new TodayFunctionNode());
-
-            //Node exp = new DateFunctionNode
-            //(
-            //    new LiteralValueNode<int>(1988),
-            //    new LiteralValueNode<int>(1),
-            //    new LiteralValueNode<int>(19)
-            //);
-
-            //Node exp = new LeftFunctionNode
-            //(
-            //    new CStringFunctionNode(new LiteralValueNode<decimal>(1.2345m)),
-            //    new LiteralValueNode<int>(3)
-            //);
-
-            //Node exp = new CIntFunctionNode
-            //(
-            //    new LiteralValueNode<decimal>(5.23m)
-            //);
-
-            //Node exp = new AbsFunctionNode
-            //(
-            //    new BinaryExpressionNode
-            //    (
-            //        new LiteralValueNode<int>(5),
-            //        new BinaryOperatorNode("-"),
-            //        new BinaryExpressionNode
-            //        (
-            //            new LiteralValueNode<int>(4),
-            //            new BinaryOperatorNode("^"),
-            //            new LiteralValueNode<int>(3)
-            //        )
-            //    )
-            //);
-
-            //string input = "(2 * (2 + 3)) ^ 2 * 4";
-            string input = "IF(AND(1 < 2, 4 > 3), 3, 4)";
-            var result = new SyntaxParser().Parse(input);
-
-            if (result.ParseSuccessful) {
-                var functionBuilder = new FunctionBuildingVisitor();
-                Node node = result.ParsedNode.Accept(functionBuilder);
-
-                var rewriter = new NodeRewritingVisitor();
-                node = node.Accept(rewriter);
-
-                var compiler = new NodeCompiler(node);
-
-                MethodInfo mInfo = compiler.Compile();
-                var del = mInfo.CreateDelegate<Func<IIdentifierDataContext, int>>();
-
-                var ctx = new DummyDataContext();
-                Console.WriteLine(del.Invoke(ctx));
-            }
-            else {
-                Console.WriteLine(result.Error);
+                Console.WriteLine();
             }
         }
     }

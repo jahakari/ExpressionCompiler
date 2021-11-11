@@ -1,6 +1,8 @@
 ﻿using ExpressionCompiler.Syntax.Nodes;
+using ExpressionCompiler.Utility;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ExpressionCompiler.Visitors
 {
@@ -8,111 +10,198 @@ namespace ExpressionCompiler.Visitors
     {
         public List<string> Errors { get; } = new();
 
+        public void Reset() => Errors.Clear();
+
         public override Node VisitAbs(AbsFunctionNode node)
         {
-            throw new NotImplementedException();
+            if (!NodeUtils.IsNumber(node.Argument)) {
+                Error($"ABS function argument '{node.Argument}' is invalid; argument must be a numeric expression.");
+            }
+
+            return base.VisitAbs(node);
         }
 
         public override Node VisitAnd(AndFunctionNode node)
         {
-            if (node.Arguments.Count < 2) {
-                Error($"Function '{node}' requires at least 2 arguments.");
-            }
-
             foreach (Node n in node.Arguments) {
-                n.Accept(this);
-
                 if (n.ValueType != NodeValueType.Boolean) {
-                    Error($"Argument '{n}' of AND function is invalid; each argument must be a Boolean expression.");
+                    Error($"AND function argument '{n}' is invalid; each argument must be a Boolean expression.");
                 }
             }
 
-            return node;
+            return base.VisitAnd(node);
         }
 
         public override Node VisitBinary(BinaryExpressionNode node)
         {
-            return node;
+            Node left = node.Left;
+            Node right = node.Right;
+
+            if (NodeUtils.IsBooleanOperator(node.Operator)) {
+                if (!NodeUtils.CanCompare(left, right, node.Operator)) {
+                    Error($"Expressions '{left}' and '{right}' cannot be compared with operator '{node.Operator}'.");
+                }
+            } else {
+                NodeValueType commonType = NodeUtils.GetCommonDataType(left, right);
+
+                if (!NodeUtils.IsNumber(commonType)) {
+                    Error($"Expression '{node}' is invalid; left and right operands must be numeric.");
+                }
+            }
+
+            return base.VisitBinary(node);
         }
 
         public override Node VisitCInt(CIntFunctionNode node)
         {
-            throw new NotImplementedException();
+            if (node.Argument.ValueType is not NodeValueType.Integer and not NodeValueType.Decimal and not NodeValueType.String) {
+                Error($"Expression '{node.Argument}' cannot be converted using the CINT function.");
+            }
+
+            return base.VisitCInt(node);
         }
 
-        public override Node VisitCString(CStringFunctionNode node)
+        public override Node VisitComplex(ComplexExpressionNode node)
         {
-            throw new NotImplementedException();
+            if (node.Nodes.Count == 1) {
+                goto exit;
+            }
+
+            //Parser ensures a valid operand-operator-operand sequence, no need to check
+
+            List<BinaryOperatorNode> booleanOps = node.Nodes.OfType<BinaryOperatorNode>()
+                .Where(NodeUtils.IsBooleanOperator)
+                .ToList();
+
+            if (booleanOps.Count > 1) {
+                Error($"Expression '{node}' is invalid; multiple boolean operators in a complex expression are not supported.");
+                goto exit;
+            }
+
+            if (booleanOps.Count > 0) {
+                int index = node.Nodes.IndexOf(booleanOps[0]);
+                IEnumerable<Node> left = node.Nodes.Take(index);
+                IEnumerable<Node> right = node.Nodes.Skip(index + 1);
+
+                var binaryNode = new BinaryExpressionNode
+                (
+                    new ComplexExpressionNode(left),
+                    booleanOps[0],
+                    new ComplexExpressionNode(right)
+                );
+
+                return VisitBinary(binaryNode);
+            }
+
+            NodeValueType commonOperandType = NodeUtils.GetCommonDataType(node.Nodes.EveryNth(2));
+
+            if (!NodeUtils.IsNumber(commonOperandType)) {
+                Error($"Expression '{node}' is invalid; all operands must be numeric.");
+            }
+
+            exit:
+            return base.VisitComplex(node);
         }
 
         public override Node VisitDate(DateFunctionNode node)
         {
-            throw new NotImplementedException();
+            Node[] args = { node.Year, node.Month, node.Day };
+
+            foreach (Node n in args) {
+                if (n.ValueType != NodeValueType.Integer) {
+                    Error($"DATE function argument '{n}' is invalid; argument must be an integer expression.");
+                }
+            }
+
+            return base.VisitDate(node);
         }
 
         public override Node VisitDay(DayFunctionNode node)
         {
-            node.Date.Accept(this);
-
             if (node.Date.ValueType != NodeValueType.Date) {
-                Error($"Function {node} is invalid; argument must be a date expression.");
+                Error($"DAY function argument '{node.Date}' is invalid; argument must be a date expression.");
             }
 
-            return node;
-        }
-
-        public override Node VisitGroup(GroupNode node)
-        {
-            throw new NotImplementedException();
+            return base.VisitDay(node);
         }
 
         public override Node VisitIf(IfFunctionNode node)
         {
-            node.Condition.Accept(this);
-            node.IfTrue.Accept(this);
-            node.IfFalse.Accept(this);
-
             if (node.Condition.ValueType != NodeValueType.Boolean) {
-                Error($"Argument '{node.Condition}' of IF function is invalid; argument must be a Boolean expression.");
+                Error($"IF function argument '{node.Condition}' is invalid; argument must be a Boolean expression.");
             }
 
-            NodeValueType returnType = node.IfTrue.ValueType | node.IfFalse.ValueType;
+            NodeValueType returnType = NodeUtils.GetCommonDataType(node.IfTrue, node.IfFalse);
 
             if (returnType == NodeValueType.None || !Enum.IsDefined(returnType)) {
                 Error($"IF function return arguments '{node.IfTrue}' and '{node.IfFalse}' are not supported, or do not have compatible data types.");
             }
 
-            return node;
+            return base.VisitIf(node);
         }
 
         public override Node VisitLeft(LeftFunctionNode node)
         {
-            throw new NotImplementedException();
+            if (node.Text.ValueType != NodeValueType.String) {
+                Error($"LEFT function argument '{node.Text}' is invalid; argument must be a string expression.");
+            }
+
+            if (node.Count.ValueType != NodeValueType.Integer) {
+                Error($"LEFT function argument '{node.Count}' is invalid; argument must be an integer expression.");
+            }
+
+            return base.VisitLeft(node);
         }
 
         public override Node VisitMonth(MonthFunctionNode node)
         {
-            throw new NotImplementedException();
+            if (node.Date.ValueType != NodeValueType.Date) {
+                Error($"MONTH function argument '{node.Date}' is invalid; argument must be a date expression");
+            }
+
+            return base.VisitMonth(node);
         }
 
         public override Node VisitNegation(NegationNode node)
         {
-            throw new NotImplementedException();
+            if (!NodeUtils.IsNumber(node.Operand)) {
+                Error($"Negation expression '{node}' is invalid; the operand must be a numeric expression");
+            }
+
+            return base.VisitNegation(node);
         }
 
         public override Node VisitOr(OrFunctionNode node)
         {
-            throw new NotImplementedException();
+            foreach (Node n in node.Arguments) {
+                if (n.ValueType != NodeValueType.Boolean) {
+                    Error($"OR function argument '{n}' is invalid; each argument must be a Boolean expression.");
+                }
+            }
+
+            return base.VisitOr(node);
         }
 
         public override Node VisitRight(RightFunctionNode node)
         {
-            throw new NotImplementedException();
+            if (node.Text.ValueType != NodeValueType.String) {
+                Error($"RIGHT function argument '{node.Text}' is invalid; argument must be a string expression.");
+            }
+
+            if (node.Count.ValueType != NodeValueType.Integer) {
+                Error($"RIGHT function argument '{node.Count}' is invalid; argument must be an integer expression.");
+            }
+
+            return base.VisitRight(node);
         }
 
         public override Node VisitYear(YearFunctionNode node)
         {
-            throw new NotImplementedException();
+            if (node.Date.ValueType != NodeValueType.Date) {
+                Error($"YEAR function argument '{node.Date}' is invalid; argument must be a date expression");
+            }
+
+            return base.VisitYear(node);
         }
 
         private void Error(string error) => Errors.Add(error);

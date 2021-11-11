@@ -61,6 +61,17 @@ namespace ExpressionCompiler.Syntax
 
                     break;
 
+                case TokenKind.Hypen:
+                    window.Advance();
+
+                    if (!TryParseNode(parseComplex: false, out node, out error)) {
+                        return false;
+                    }
+
+                    node = new NegationNode(node);
+
+                    break;
+
                 case TokenKind.Word:
                     switch (t.Value) {
                         case "TRUE":

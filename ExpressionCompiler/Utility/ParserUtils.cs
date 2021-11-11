@@ -13,6 +13,7 @@ namespace ExpressionCompiler.Utility
                 case "<=":
                 case ">=":
                 case "<>":
+                case "!":
                 case "!=":
                 case "+":
                 case "-":

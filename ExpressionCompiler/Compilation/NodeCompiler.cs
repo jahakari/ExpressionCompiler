@@ -10,18 +10,19 @@ namespace ExpressionCompiler.Compilation
 {
     public class NodeCompiler : NodeVisitor
     {
-        private static ModuleBuilder module;
-        private static int methodCount = 0;
+        private static readonly ModuleBuilder moduleBuilder;
+        private static int count = 0;
 
         static NodeCompiler()
         {
             var name = new AssemblyName("Dynamic_Expressions");
             var assembly = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
-            module = assembly.DefineDynamicModule("Dynamic_Expressions_Module");
+            moduleBuilder = assembly.DefineDynamicModule("Dynamic_Expressions_Module");
         }
 
         private readonly Node node;
         private readonly string methodName;
+        private readonly TypeBuilder typeBuilder;
         private readonly MethodBuilder methodBuilder;
         private readonly ILGenerator il;
 
@@ -29,9 +30,10 @@ namespace ExpressionCompiler.Compilation
         {
             this.node = node;
 
+            typeBuilder = moduleBuilder.DefineType($"ExpressionCompiler.Dynamic_Type_{count++}", TypeAttributes.Public);
             Type returnType = NodeUtils.GetNodeType(node);
-            methodName = $"Dynamic_Method_{++methodCount}";
-            methodBuilder = module.DefineGlobalMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, new[] { typeof(IIdentifierDataContext)} );
+            methodName = $"Dynamic_Method_{count}";
+            methodBuilder = typeBuilder.DefineMethod(methodName, MethodAttributes.Public | MethodAttributes.Static, returnType, new[] { typeof(IIdentifierDataContext)} );
             il = methodBuilder.GetILGenerator();
         }
 
@@ -40,8 +42,7 @@ namespace ExpressionCompiler.Compilation
             node.Accept(this);
             il.Emit(Ret);
 
-            module.CreateGlobalFunctions();
-            return module.GetMethod(methodName);
+            return typeBuilder.CreateType().GetMethod(methodName);
         }
 
         public override Node VisitAbs(AbsFunctionNode node)

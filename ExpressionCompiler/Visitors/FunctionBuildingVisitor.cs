@@ -6,8 +6,9 @@ namespace ExpressionCompiler.Visitors
 {
     public class FunctionBuildingVisitor : NodeVisitor
     {
-        private readonly List<string> errors = new();
         private readonly IFunctionContext functionContext = FunctionContext.Instance;
+
+        public List<string> Errors { get; } = new();
 
         public override Node VisitFunction(FunctionNode node)
         {
@@ -19,6 +20,8 @@ namespace ExpressionCompiler.Visitors
             return node;
         }
 
-        private void Error(string error) => errors.Add(error);
+        public void Reset() => Errors.Clear();
+
+        private void Error(string error) => Errors.Add(error);
     }
 }

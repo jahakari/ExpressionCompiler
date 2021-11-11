@@ -11,7 +11,12 @@ namespace ExpressionCompiler.Syntax.Nodes
         public ComplexExpressionNode(IEnumerable<Node> nodes)
         {
             Nodes = nodes.ToList();
-            ValueType = NodeUtils.GetCommonDataType(nodes.EveryNth(2));
+
+            if (nodes.Any(n => n is BinaryOperatorNode op && op.OperatorCategory == OperatorType.Boolean)) {
+                ValueType = NodeValueType.Boolean;
+            } else {
+                ValueType = NodeUtils.GetCommonDataType(nodes.EveryNth(2));
+            }
         }
 
         public override NodeType NodeType => NodeType.Complex;
