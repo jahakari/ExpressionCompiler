@@ -123,6 +123,25 @@ namespace ExpressionCompiler.Utility
             };
         }
 
+        public static string GetOperatorNameForOperatorType(OperatorType operatorType)
+        {
+            return operatorType switch
+            {
+                OperatorType.Add                => op_Addition,
+                OperatorType.Subtract           => op_Subtraction,
+                OperatorType.Multiply           => op_Multiply,
+                OperatorType.Divide             => op_Multiply,
+                OperatorType.Modulo             => op_Modulus,
+                OperatorType.Equal              => op_Equality,
+                OperatorType.NotEqual           => op_Inequality,
+                OperatorType.LessThan           => op_LessThan,
+                OperatorType.LessThanOrEqual    => op_LessThanOrEqual,
+                OperatorType.GreaterThan        => op_GreaterThan,
+                OperatorType.GreaterThanOrEqual => op_GreaterThanOrEqual,
+                _                               => throw new InvalidOperationException($"Operator '{operatorType}' is not supported.")
+            };
+        }
+
         private static ConstructorInfo dateTimeConstructor;
         public static ConstructorInfo DateTimeConstructor
             => dateTimeConstructor ??= typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int) });

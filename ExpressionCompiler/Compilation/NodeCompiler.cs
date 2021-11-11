@@ -107,6 +107,14 @@ namespace ExpressionCompiler.Compilation
             node.Left.Accept(this);
             node.Right.Accept(this);
 
+            //if node.Right isn't also a date, then the validating visitor has failed us
+            if (node.Left.ValueType == NodeValueType.Date) {
+                MethodInfo opMethod = typeof(DateTime).GetMethod(TypeHelper.GetOperatorNameForOperatorType(node.Operator.OperatorType));
+                il.Emit(Call, opMethod);
+
+                return node;
+            }
+
             OperatorType opType = node.Operator.OperatorType;
 
             switch (opType) {
