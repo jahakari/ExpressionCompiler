@@ -95,19 +95,17 @@ namespace ExpressionCompiler.Compilation
         public override Node VisitBinary(BinaryExpressionNode node)
         {
             if (node.Operator.OperatorType == OperatorType.Exponent) {
-                CompileExponent(node);
+                CompileExponentBinaryExpression(node);
+                return node;
+            }
+
+            if (node.ValueType is NodeValueType.Decimal or NodeValueType.Number) {
+                CompileDecimalBinaryExpression(node);
                 return node;
             }
 
             node.Left.Accept(this);
             node.Right.Accept(this);
-
-            if (node.ValueType == NodeValueType.Decimal) {
-                MethodInfo mInfo = TypeHelper.GetDecimalMethodForOperator(node.Operator.OperatorType);
-                il.Emit(Call, mInfo);
-
-                return node;
-            }
 
             OperatorType opType = node.Operator.OperatorType;
 
@@ -134,20 +132,37 @@ namespace ExpressionCompiler.Compilation
             return node;
         }
 
-        private void CompileExponent(BinaryExpressionNode node)
+        private void CompileExponentBinaryExpression(BinaryExpressionNode node)
         {
-            node.Left.Accept(this);
-            EmitConversionToDouble(node.Left);
-
-            node.Right.Accept(this);
-            EmitConversionToDouble(node.Right);
+            EmitAsDouble(node.Left);
+            EmitAsDouble(node.Right);
 
             il.Emit(Call, TypeHelper.MathPowMethod);
             EmitConversionFromDouble(node);
         }
 
-        private void EmitConversionToDouble(Node node)
+        private void CompileDecimalBinaryExpression(BinaryExpressionNode node)
         {
+            EmitAsDecimal(node.Left);
+            EmitAsDecimal(node.Right);
+
+            MethodInfo mInfo = TypeHelper.GetDecimalMethodForOperator(node.Operator.OperatorType);
+            il.Emit(Call, mInfo);
+        }
+
+        private void EmitAsDecimal(Node node)
+        {
+            node.Accept(this);
+
+            if (node.ValueType == NodeValueType.Integer) {
+                il.Emit(Newobj, TypeHelper.DecimalConstructorFromInt);
+            }
+        }
+
+        private void EmitAsDouble(Node node)
+        {
+            node.Accept(this);
+
             if (node.ValueType == NodeValueType.Integer) {
                 il.Emit(Conv_R8);
             } else {
@@ -211,7 +226,7 @@ namespace ExpressionCompiler.Compilation
             switch (node.Argument.ValueType) {
                 case NodeValueType.Decimal:
                 case NodeValueType.Number:
-                    MethodInfo cast = TypeHelper.GetDecimalExplicitCastMethod(typeof(int));
+                    MethodInfo cast = TypeHelper.GetExplicitCastMethod(typeof(decimal), typeof(int));
                     il.Emit(Call, cast);
                     break;
 

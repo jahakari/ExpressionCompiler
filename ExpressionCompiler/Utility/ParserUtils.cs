@@ -10,17 +10,39 @@ namespace ExpressionCompiler.Utility
                 case "=":
                 case "<":
                 case ">":
-                case "<=":
-                case ">=":
-                case "<>":
-                case "!":
-                case "!=":
                 case "+":
                 case "-":
                 case "*":
                 case "/":
                 case "%":
                 case "^":
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsCompoundOperator(string value)
+        {
+            switch (value) {
+                case "<=":
+                case ">=":
+                case "<>":
+                case "!=":
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        public static bool MaybeCompoundOperator(string value)
+        {
+            switch (value) {
+                case "<":
+                case ">":
+                case "!":
                     return true;
 
                 default:

@@ -58,7 +58,6 @@ namespace ExpressionCompiler.Syntax
                     }
 
                     node = new GroupNode(node);
-
                     break;
 
                 case TokenKind.Hypen:
@@ -69,7 +68,6 @@ namespace ExpressionCompiler.Syntax
                     }
 
                     node = new NegationNode(node);
-
                     break;
 
                 case TokenKind.Word:
@@ -119,12 +117,13 @@ namespace ExpressionCompiler.Syntax
                 default:
                     node = null;
                     error = $"Unexpected token '{t.Value}' was encountered by the parser.";
-                    break;
+
+                    return false;
             }
 
             window.Advance();
 
-            if (parseComplex && ParserUtils.IsOperator(window.Current.Value)) {
+            if (parseComplex && (ParserUtils.IsOperator(window.Current.Value) || ParserUtils.MaybeCompoundOperator(window.Current.Value))) {
                 if (TryParseComplexExpression(node, out ComplexExpressionNode complex, out error)) {
                     node = complex;
                     return true;
@@ -167,6 +166,19 @@ namespace ExpressionCompiler.Syntax
             error = null;
 
             string opValue = window.Current.Value;
+            string next = window.Next.Value;
+
+            if (next.Length == 1) {
+                string combined = opValue + next;
+
+                if (ParserUtils.IsCompoundOperator(combined)) {
+                    window.Advance();
+                    window.Advance();
+                    op = new BinaryOperatorNode(combined);
+
+                    return true;
+                }
+            }
 
             if (!ParserUtils.IsOperator(opValue)) {
                 error = $"Unexpected token '{opValue}' was encountered by the parser; expected operator.";
@@ -174,17 +186,6 @@ namespace ExpressionCompiler.Syntax
             }
 
             window.Advance();
-
-            if (ParserUtils.IsOperator(window.Current.Value)) {
-                opValue += window.Current.Value;
-
-                if (!ParserUtils.IsOperator(opValue)) {
-                    error = $"Invalid compound operator '{opValue}' was encountered by the parser.";
-                    return false;
-                }
-
-                window.Advance();
-            }
 
             op = new BinaryOperatorNode(opValue);
             return true;

@@ -21,7 +21,7 @@ namespace ExpressionCompiler.Visitors
                     (LiteralValueNode<int> i1, LiteralValueNode<int> i2)         => NodeUtils.CreateConstant(i1.Value, i2.Value, opType),
                     (LiteralValueNode<decimal> d1, LiteralValueNode<decimal> d2) => NodeUtils.CreateConstant(d1.Value, d2.Value, opType),
                     (LiteralValueNode<decimal> d, LiteralValueNode<int> i)       => NodeUtils.CreateConstant(d.Value, i.Value, opType),
-                    (LiteralValueNode<int> i, LiteralValueNode<decimal> d)       => NodeUtils.CreateConstant(d.Value, i.Value, opType),
+                    (LiteralValueNode<int> i, LiteralValueNode<decimal> d)       => NodeUtils.CreateConstant(i.Value, d.Value, opType),
                     _                                                            => node
                 };
             }

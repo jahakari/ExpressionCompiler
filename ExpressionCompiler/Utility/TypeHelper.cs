@@ -36,6 +36,10 @@ namespace ExpressionCompiler.Utility
         public static ConstructorInfo DecimalConstructorFromDouble
             => decimalConstructorFromDouble ??= typeof(decimal).GetConstructor(new[] { typeof(double) });
 
+        private static ConstructorInfo decimalConstructorFromInt;
+        public static ConstructorInfo DecimalConstructorFromInt
+            => decimalConstructorFromInt ??= typeof(decimal).GetConstructor(new[] { typeof(int) });
+
         private static MethodInfo decimalAddMethod;
         public static MethodInfo DecimalAddMethod
             => decimalAddMethod ??= GetDecimalOperatorMethod(op_Addition);
@@ -82,11 +86,11 @@ namespace ExpressionCompiler.Utility
 
         private static MethodInfo decimalToFloatExplicitCastMethod;
         public static MethodInfo DecimalToFloatExplicitCastMethod
-            => decimalToFloatExplicitCastMethod ??= GetDecimalExplicitCastMethod(typeof(double));
+            => decimalToFloatExplicitCastMethod ??= GetExplicitCastMethod(typeof(decimal), typeof(double));
 
-        public static MethodInfo GetDecimalExplicitCastMethod(Type returnType)
+        public static MethodInfo GetExplicitCastMethod(Type sourceType, Type returnType)
         {
-            return typeof(decimal)
+            return sourceType
                 .GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .Where(m => m.Name == op_Explicit)
                 .First(m => m.ReturnType == returnType);
