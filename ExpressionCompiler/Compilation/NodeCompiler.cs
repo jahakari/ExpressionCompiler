@@ -2,6 +2,8 @@
 using ExpressionCompiler.Utility;
 using ExpressionCompiler.Visitors;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using static System.Reflection.Emit.OpCodes;
@@ -419,6 +421,78 @@ namespace ExpressionCompiler.Compilation
             }
 
             return node;
+        }
+
+        public override Node VisitMax(MaxFunctionNode node)
+        {
+            if (node.ValueType == NodeValueType.Integer) {
+                EmitIntegerMinMaxFunction(node.Arguments, Bgt);
+            } else {
+                EmitDecimalMinMaxFunction(node.Arguments, TypeHelper.DecimalGreaterThanMethod);
+            }
+
+            return node;
+        }
+
+        public override Node VisitMin(MinFunctionNode node)
+        {
+            if (node.ValueType == NodeValueType.Integer) {
+                EmitIntegerMinMaxFunction(node.Arguments, Blt);
+            } else {
+                EmitDecimalMinMaxFunction(node.Arguments, TypeHelper.DecimalLessThanMethod);
+            }
+
+            return node;
+        }
+
+        private void EmitIntegerMinMaxFunction(List<Node> arguments, OpCode comparer)
+        {
+            LocalBuilder final = il.DeclareLocal(typeof(int));
+            LocalBuilder current = il.DeclareLocal(typeof(int));
+
+            arguments[0].Accept(this);
+            il.Emit(Stloc, final);
+            il.Emit(Ldloc, final);
+
+            foreach (Node n in arguments.Skip(1)) {
+                Label label = il.DefineLabel();
+                n.Accept(this);
+                il.Emit(Stloc, current);
+                il.Emit(Ldloc, current);
+                il.Emit(comparer, label);
+
+                il.Emit(Ldloc, current);
+                il.Emit(Stloc, final);
+
+                il.MarkLabel(label);
+                il.Emit(Ldloc, final);
+            }
+        }
+
+        private void EmitDecimalMinMaxFunction(List<Node> arguments, MethodInfo comparer)
+        {
+            LocalBuilder final = il.DeclareLocal(typeof(decimal));
+            LocalBuilder current = il.DeclareLocal(typeof(decimal));
+
+            EmitAsDecimal(arguments[0]);
+            il.Emit(Stloc, final);
+            il.Emit(Ldloc, final);
+
+            foreach (Node n in arguments.Skip(1)) {
+                Label label = il.DefineLabel();
+                EmitAsDecimal(n);
+                il.Emit(Stloc, current);
+                il.Emit(Ldloc, current);
+
+                il.Emit(Call, comparer);
+                il.Emit(Brtrue, label);
+
+                il.Emit(Ldloc, current);
+                il.Emit(Stloc, final);
+
+                il.MarkLabel(label);
+                il.Emit(Ldloc, final);
+            }
         }
 
         public override Node VisitMonth(MonthFunctionNode node)

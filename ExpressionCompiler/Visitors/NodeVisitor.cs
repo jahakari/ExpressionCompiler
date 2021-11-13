@@ -79,6 +79,18 @@ namespace ExpressionCompiler.Visitors
         public virtual Node VisitLiteral(LiteralValueNode node)
             => node;
 
+        public virtual Node VisitMax(MaxFunctionNode node)
+        {
+            IEnumerable<Node> nodes = node.Arguments.Select(n => n.Accept(this));
+            return node.Update(nodes);
+        }
+
+        public virtual Node VisitMin(MinFunctionNode node)
+        {
+            IEnumerable<Node> nodes = node.Arguments.Select(n => n.Accept(this));
+            return node.Update(nodes);
+        }
+
         public virtual Node VisitMonth(MonthFunctionNode node)
             => node.Update(node.Date.Accept(this));
 

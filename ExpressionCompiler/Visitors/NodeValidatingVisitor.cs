@@ -153,10 +153,32 @@ namespace ExpressionCompiler.Visitors
             return base.VisitLeft(node);
         }
 
+        public override Node VisitMax(MaxFunctionNode node)
+        {
+            foreach (Node n in node.Arguments) {
+                if (!NodeUtils.IsNumber(n)) {
+                    Error($"MAX function argument '{n}' is invalid; argument must be a numeric expression.");
+                }
+            }
+
+            return base.VisitMax(node);
+        }
+
+        public override Node VisitMin(MinFunctionNode node)
+        {
+            foreach (Node n in node.Arguments) {
+                if (!NodeUtils.IsNumber(n)) {
+                    Error($"MIN function argument '{n}' is invalid; argument must be a numeric expression.");
+                }
+            }
+
+            return base.VisitMin(node);
+        }
+
         public override Node VisitMonth(MonthFunctionNode node)
         {
             if (node.Date.ValueType != NodeValueType.Date) {
-                Error($"MONTH function argument '{node.Date}' is invalid; argument must be a date expression");
+                Error($"MONTH function argument '{node.Date}' is invalid; argument must be a date expression.");
             }
 
             return base.VisitMonth(node);
@@ -165,7 +187,7 @@ namespace ExpressionCompiler.Visitors
         public override Node VisitNegation(NegationNode node)
         {
             if (!NodeUtils.IsNumber(node.Operand)) {
-                Error($"Negation expression '{node}' is invalid; the operand must be a numeric expression");
+                Error($"Negation expression '{node}' is invalid; the operand must be a numeric expression.");
             }
 
             return base.VisitNegation(node);
@@ -198,7 +220,7 @@ namespace ExpressionCompiler.Visitors
         public override Node VisitYear(YearFunctionNode node)
         {
             if (node.Date.ValueType != NodeValueType.Date) {
-                Error($"YEAR function argument '{node.Date}' is invalid; argument must be a date expression");
+                Error($"YEAR function argument '{node.Date}' is invalid; argument must be a date expression.");
             }
 
             return base.VisitYear(node);

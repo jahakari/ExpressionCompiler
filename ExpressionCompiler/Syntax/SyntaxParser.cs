@@ -10,6 +10,14 @@ namespace ExpressionCompiler.Syntax
     {
         private Window<Token> window;
         private readonly IFunctionContext functionContext = FunctionContext.Instance;
+        private readonly IIdentifierContext identifierContext;
+
+        public SyntaxParser(IIdentifierContext identifierContext)
+        {
+            this.identifierContext = identifierContext;
+        }
+
+        public SyntaxParser() : this(new DefaultIdentifierContext()) { }
 
         public ParseResult Parse(string input)
         {
@@ -92,6 +100,10 @@ namespace ExpressionCompiler.Syntax
                                 break;
                             }
 
+                            if (identifierContext.IsIdentifier(t.Value)) {
+                                NodeValueType type = identifierContext.GetValueType(t.Value);
+                                node = new IdentifierNode(t.Value, type);
+                            }
 
                             break;
                     }
