@@ -108,6 +108,7 @@ namespace ExpressionCompiler.Syntax
                             break;
                     }
                     break;
+
                 case TokenKind.String:
                     if (DateTime.TryParse(t.Value, out DateTime date)) {
                         node = new LiteralValueNode<DateTime>(date);

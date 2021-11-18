@@ -143,7 +143,15 @@ namespace ExpressionCompiler.Tokenizing
             while (window.HasItem) {
                 char c = window.Current;
 
-                if (c == '"' && window.Previous != '\\') {
+                if (c == '\\' && window.Next == '"') {
+                    window.Advance();
+                    window.Advance();
+                    stringBuilder.Append('"');
+
+                    continue;
+                }
+
+                if (c == '"') {
                     window.Advance();
                     break;
                 }

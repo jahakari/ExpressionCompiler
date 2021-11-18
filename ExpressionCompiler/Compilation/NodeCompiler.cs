@@ -101,7 +101,7 @@ namespace ExpressionCompiler.Compilation
                 return node;
             }
 
-            if (node.ValueType is NodeValueType.Decimal or NodeValueType.Number) {
+            if (NodeUtils.GetCommonDataType(node.Left, node.Right) is NodeValueType.Decimal or NodeValueType.Number) {
                 CompileDecimalBinaryExpression(node);
                 return node;
             }
