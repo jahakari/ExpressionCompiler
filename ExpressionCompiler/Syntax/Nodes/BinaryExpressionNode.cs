@@ -23,6 +23,7 @@ namespace ExpressionCompiler.Syntax.Nodes
                 return Left.ValueType | Right.ValueType;
             }
         }
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public Node Left { get; }
         public BinaryOperatorNode Operator { get; }

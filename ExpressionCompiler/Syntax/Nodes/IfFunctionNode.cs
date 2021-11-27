@@ -12,8 +12,8 @@ namespace ExpressionCompiler.Syntax.Nodes
         }
 
         public override NodeType NodeType => NodeType.Function;
-
         public override NodeValueType ValueType => IfTrue.ValueType | IfFalse.ValueType;
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public Node Condition { get; }
         public Node IfTrue { get; }

@@ -29,6 +29,23 @@ namespace ExpressionCompiler.Visitors
             return node.Update(left, right);
         }
 
+        public override Node VisitCase(CaseFunctionNode node)
+        {
+            node = (CaseFunctionNode)base.VisitCase(node);
+            return CreateIfNode(0);
+
+            Node CreateIfNode(int i)
+            {
+                var caseArg = (RelationalNode)node.CaseArguments[i];
+                var condition = new BinaryExpressionNode(node.SwitchArgument, caseArg.Operator, caseArg.Operand);
+
+                Node ifTrue = node.ReturnArguments[i];
+                Node ifFalse = ++i == node.ReturnArguments.Length ? node.DefaultArgument : CreateIfNode(i);
+
+                return new IfFunctionNode(condition, ifTrue, ifFalse);
+            }
+        }
+
         public override Node VisitComplex(ComplexExpressionNode node)
         {
             List<Node> nodes = node.Nodes.Select(n => n.Accept(this)).ToList();

@@ -13,7 +13,9 @@
         public TokenKind Kind { get; set; }
         public string Value { get; set; }
 
-        public override string ToString()
-            => $"{Kind, -20}{Value}";
+        public override string ToString() => Value;
+
+        public static string operator +(Token t1, Token t2) => t1.Value + t2.Value; 
+        public static implicit operator string(Token token) => token.Value;
     }
 }

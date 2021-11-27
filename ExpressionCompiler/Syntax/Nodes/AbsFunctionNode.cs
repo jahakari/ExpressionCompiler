@@ -10,8 +10,8 @@ namespace ExpressionCompiler.Syntax.Nodes
         }
 
         public override NodeType NodeType => NodeType.Function;
-
         public override NodeValueType ValueType => Argument.ValueType;
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public Node Argument { get; }
 

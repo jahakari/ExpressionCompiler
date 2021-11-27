@@ -9,6 +9,7 @@
         Identifier,
         Group,
         Complex,
-        Negation
+        Negation,
+        Relational
     }
 }

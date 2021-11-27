@@ -14,6 +14,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitAbs(AbsFunctionNode node)
         {
+            ValidateValueSemanticType(node.Argument);
+
             if (!NodeUtils.IsNumber(node.Argument)) {
                 Error($"ABS function argument '{node.Argument}' is invalid; argument must be a numeric expression.");
             }
@@ -23,6 +25,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitAnd(AndFunctionNode node)
         {
+            ValidateValueSemanticType(node.Arguments);
+
             foreach (Node n in node.Arguments) {
                 if (n.ValueType != NodeValueType.Boolean) {
                     Error($"AND function argument '{n}' is invalid; each argument must be a Boolean expression.");
@@ -36,6 +40,9 @@ namespace ExpressionCompiler.Visitors
         {
             Node left = node.Left;
             Node right = node.Right;
+
+            ValidateValueSemanticType(left);
+            ValidateValueSemanticType(right);
 
             if (NodeUtils.IsBooleanOperator(node.Operator)) {
                 if (!NodeUtils.CanCompare(left, right, node.Operator)) {
@@ -52,8 +59,34 @@ namespace ExpressionCompiler.Visitors
             return base.VisitBinary(node);
         }
 
+        public override Node VisitCase(CaseFunctionNode node)
+        {
+            ValidateValueSemanticType(node.SwitchArgument);
+            ValidateValueSemanticType(node.DefaultArgument);
+            ValidateValueSemanticType(node.ReturnArguments);
+
+            foreach (Node n in node.CaseArguments) {
+                if (n is not RelationalNode r) {
+                    Error($"CASE function argument '{n}' is invalid; argument must be a relational expression.");
+                    continue;
+                }
+
+                if (!NodeUtils.CanCompare(node.SwitchArgument, r.Operand, r.Operator)) {
+                    Error($"CASE function argument '{n}' is invalid; switch argument '{node.SwitchArgument}' cannot be compared to operand '{r.Operand}' using operator '{r.Operator}'.");
+                }
+            }
+
+            if (!Enum.IsDefined(node.ValueType)) {
+                Error("One or more CASE function return arguments are invalid; all return arguments must share a common data type.");
+            }
+
+            return base.VisitCase(node);
+        }
+
         public override Node VisitCInt(CIntFunctionNode node)
         {
+            ValidateValueSemanticType(node.Argument);
+
             if (node.Argument.ValueType is not NodeValueType.Integer and not NodeValueType.Decimal and not NodeValueType.String) {
                 Error($"Expression '{node.Argument}' cannot be converted using the CINT function.");
             }
@@ -64,6 +97,7 @@ namespace ExpressionCompiler.Visitors
         public override Node VisitComplex(ComplexExpressionNode node)
         {
             if (node.Nodes.Count == 1) {
+                ValidateValueSemanticType(node.Nodes[0]);
                 goto exit;
             }
 
@@ -93,19 +127,20 @@ namespace ExpressionCompiler.Visitors
                 return VisitBinary(binaryNode);
             }
 
-            NodeValueType commonOperandType = NodeUtils.GetCommonDataType(node.Nodes.EveryNth(2));
-
-            if (!NodeUtils.IsNumber(commonOperandType)) {
+            if (!NodeUtils.IsNumber(node.ValueType)) {
                 Error($"Expression '{node}' is invalid; all operands must be numeric.");
             }
 
+            ValidateValueSemanticType(node.Nodes.EveryNth(2)); //operands
+
             exit:
-            return base.VisitComplex(node);
+                return base.VisitComplex(node);
         }
 
         public override Node VisitDate(DateFunctionNode node)
         {
             Node[] args = { node.Year, node.Month, node.Day };
+            ValidateValueSemanticType(args);
 
             foreach (Node n in args) {
                 if (n.ValueType != NodeValueType.Integer) {
@@ -118,6 +153,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitDay(DayFunctionNode node)
         {
+            ValidateValueSemanticType(node.Date);
+
             if (node.Date.ValueType != NodeValueType.Date) {
                 Error($"DAY function argument '{node.Date}' is invalid; argument must be a date expression.");
             }
@@ -127,13 +164,15 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitIf(IfFunctionNode node)
         {
+            ValidateValueSemanticType(node.Condition);
+            ValidateValueSemanticType(node.IfTrue);
+            ValidateValueSemanticType(node.IfFalse);
+
             if (node.Condition.ValueType != NodeValueType.Boolean) {
                 Error($"IF function argument '{node.Condition}' is invalid; argument must be a Boolean expression.");
             }
 
-            NodeValueType returnType = NodeUtils.GetCommonDataType(node.IfTrue, node.IfFalse);
-
-            if (returnType == NodeValueType.None || !Enum.IsDefined(returnType)) {
+            if (node.ValueType == NodeValueType.None || !Enum.IsDefined(node.ValueType)) {
                 Error($"IF function return arguments '{node.IfTrue}' and '{node.IfFalse}' are not supported, or do not have compatible data types.");
             }
 
@@ -142,6 +181,9 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitLeft(LeftFunctionNode node)
         {
+            ValidateValueSemanticType(node.Text);
+            ValidateValueSemanticType(node.Count);
+
             if (node.Text.ValueType != NodeValueType.String) {
                 Error($"LEFT function argument '{node.Text}' is invalid; argument must be a string expression.");
             }
@@ -155,6 +197,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitMax(MaxFunctionNode node)
         {
+            ValidateValueSemanticType(node.Arguments);
+
             foreach (Node n in node.Arguments) {
                 if (!NodeUtils.IsNumber(n)) {
                     Error($"MAX function argument '{n}' is invalid; argument must be a numeric expression.");
@@ -166,6 +210,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitMin(MinFunctionNode node)
         {
+            ValidateValueSemanticType(node.Arguments);
+
             foreach (Node n in node.Arguments) {
                 if (!NodeUtils.IsNumber(n)) {
                     Error($"MIN function argument '{n}' is invalid; argument must be a numeric expression.");
@@ -177,6 +223,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitMonth(MonthFunctionNode node)
         {
+            ValidateValueSemanticType(node.Date);
+
             if (node.Date.ValueType != NodeValueType.Date) {
                 Error($"MONTH function argument '{node.Date}' is invalid; argument must be a date expression.");
             }
@@ -186,6 +234,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitNegation(NegationNode node)
         {
+            ValidateValueSemanticType(node.Operand);
+
             if (!NodeUtils.IsNumber(node.Operand)) {
                 Error($"Negation expression '{node}' is invalid; the operand must be a numeric expression.");
             }
@@ -195,6 +245,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitOr(OrFunctionNode node)
         {
+            ValidateValueSemanticType(node.Arguments);
+
             foreach (Node n in node.Arguments) {
                 if (n.ValueType != NodeValueType.Boolean) {
                     Error($"OR function argument '{n}' is invalid; each argument must be a Boolean expression.");
@@ -204,8 +256,17 @@ namespace ExpressionCompiler.Visitors
             return base.VisitOr(node);
         }
 
+        public override Node VisitRelational(RelationalNode node)
+        {
+            ValidateValueSemanticType(node.Operand);
+            return base.VisitRelational(node);
+        }
+
         public override Node VisitRight(RightFunctionNode node)
         {
+            ValidateValueSemanticType(node.Text);
+            ValidateValueSemanticType(node.Count);
+
             if (node.Text.ValueType != NodeValueType.String) {
                 Error($"RIGHT function argument '{node.Text}' is invalid; argument must be a string expression.");
             }
@@ -219,6 +280,8 @@ namespace ExpressionCompiler.Visitors
 
         public override Node VisitYear(YearFunctionNode node)
         {
+            ValidateValueSemanticType(node.Date);
+
             if (node.Date.ValueType != NodeValueType.Date) {
                 Error($"YEAR function argument '{node.Date}' is invalid; argument must be a date expression.");
             }
@@ -227,5 +290,26 @@ namespace ExpressionCompiler.Visitors
         }
 
         private void Error(string error) => Errors.Add(error);
+
+        private bool ValidateValueSemanticType(Node node)
+        {
+            if (node.SemanticType != SemanticType.Value) {
+                Error($"Expression '{node}' is not valid in the current context.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateValueSemanticType(IEnumerable<Node> nodes)
+        {
+            bool valid = true;
+
+            foreach (Node node in nodes) {
+                valid &= ValidateValueSemanticType(node);
+            }
+
+            return valid;
+        }
     }
 }

@@ -15,6 +15,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public override NodeValueType ValueType => valueType;
         public override NodeType NodeType => NodeType.LiteralValue;
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public T Value { get; }
 

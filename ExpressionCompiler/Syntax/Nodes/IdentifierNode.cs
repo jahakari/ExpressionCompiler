@@ -1,5 +1,4 @@
 ﻿using ExpressionCompiler.Visitors;
-using System;
 
 namespace ExpressionCompiler.Syntax.Nodes
 {
@@ -14,8 +13,8 @@ namespace ExpressionCompiler.Syntax.Nodes
         }
 
         public override NodeType NodeType => NodeType.Identifier;
-
         public override NodeValueType ValueType => valueType;
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public string Identifier { get; }
 

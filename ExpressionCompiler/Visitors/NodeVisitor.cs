@@ -23,6 +23,12 @@ namespace ExpressionCompiler.Visitors
             return node.Update(left, right);
         }
 
+        public virtual Node VisitCase(CaseFunctionNode node)
+        {
+            IEnumerable<Node> arguments = node.Arguments.Select(n => n.Accept(this));
+            return node.Update(arguments);
+        }
+
         public virtual Node VisitCInt(CIntFunctionNode node)
             => node.Update(node.Argument.Accept(this));
 
@@ -102,6 +108,9 @@ namespace ExpressionCompiler.Visitors
             IEnumerable<Node> arguments = node.Arguments.Select(a => a.Accept(this));
             return node.Update(arguments);
         }
+
+        public virtual Node VisitRelational(RelationalNode node)
+            => node.Update(node.Operator, node.Operand.Accept(this));
 
         public virtual Node VisitRight(RightFunctionNode node)
         {

@@ -12,8 +12,8 @@ namespace ExpressionCompiler.Syntax.Nodes
         }
 
         public override NodeType NodeType => NodeType.Function;
-
         public override NodeValueType ValueType => NodeValueType.Boolean;
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public List<Node> Arguments { get; }
 

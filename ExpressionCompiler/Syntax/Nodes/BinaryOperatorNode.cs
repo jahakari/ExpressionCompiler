@@ -18,6 +18,7 @@ namespace ExpressionCompiler.Syntax.Nodes
 
         public override NodeType NodeType => NodeType.BinaryOperator;
         public override NodeValueType ValueType => NodeValueType.None;
+        public override SemanticType SemanticType => SemanticType.NonValue;
 
         public string Operator { get; }
         public OperatorType OperatorType { get; }

@@ -17,7 +17,7 @@ namespace ExpressionCompiler.Utility
         public T Next => Peek();
         public T Previous => Peek(-1);
 
-        public void Advance() => index++;
+        public void Advance(int count = 1) => index += count;
         public void Recede() => index--;
         public T Peek(int offset = 1)
         {

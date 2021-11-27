@@ -52,6 +52,11 @@ namespace ExpressionCompiler.Evaluation
                 return false;
             }
 
+            if (parseResult.ParsedNode.SemanticType != SemanticType.Value) {
+                errors = new List<string> { $"Expression '{parseResult.ParsedNode}' cannot be evaluated." };
+                return false;
+            }
+
             functionBuilder.Reset();
             Node node = parseResult.ParsedNode.Accept(functionBuilder);
 

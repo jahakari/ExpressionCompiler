@@ -24,7 +24,7 @@ namespace ExpressionCompiler.Syntax
             IEnumerable<Token> tokens = new Tokenizer(input, skipWhitespace: true).Tokenize();
             window = new Window<Token>(tokens);
 
-            if (TryParseNode(parseComplex: true, out Node node, out string error)) {
+            if (ParseNode(parseComplex: true, out Node node, out string error)) {
                 if (window.HasItem) {
                     return ParseResult.Failure($"Unexpected token '{window.Current.Value}' at end of expression");
                 }
@@ -35,7 +35,7 @@ namespace ExpressionCompiler.Syntax
             return ParseResult.Failure(error);
         }
 
-        private bool TryParseNode(bool parseComplex, out Node node, out string error)
+        private bool ParseNode(bool parseComplex, out Node node, out string error)
         {
             node = null;
             error = null;
@@ -51,7 +51,7 @@ namespace ExpressionCompiler.Syntax
                 case TokenKind.LParen:
                     window.Advance();
 
-                    if (!TryParseNode(parseComplex: true, out node, out error)) {
+                    if (!ParseNode(parseComplex: true, out node, out error)) {
                         return false;
                     }
 
@@ -71,7 +71,7 @@ namespace ExpressionCompiler.Syntax
                 case TokenKind.Hypen:
                     window.Advance();
 
-                    if (!TryParseNode(parseComplex: false, out node, out error)) {
+                    if (!ParseNode(parseComplex: false, out node, out error)) {
                         return false;
                     }
 
@@ -92,7 +92,7 @@ namespace ExpressionCompiler.Syntax
                             if (functionContext.IsFunction(t.Value)) {
                                 window.Advance();
 
-                                if (!TryParseFunctionArguments(t.Value, out List<Node> arguments, out error)) {
+                                if (!ParseFunctionArguments(t.Value, out List<Node> arguments, out error)) {
                                     return false;
                                 }
 
@@ -128,17 +128,19 @@ namespace ExpressionCompiler.Syntax
                     break;
 
                 default:
-                    node = null;
-                    error = $"Unexpected token '{t.Value}' was encountered by the parser.";
+                    if (TryParseRelationalExpression(out node)) {
+                        window.Advance();
+                        return true;
+                    }
 
+                    error = $"Unexpected token '{t}' was encountered by the parser.";
                     return false;
             }
 
             window.Advance();
 
-            if (parseComplex && (ParserUtils.IsOperator(window.Current.Value) || ParserUtils.MaybeCompoundOperator(window.Current.Value))) {
-                if (TryParseComplexExpression(node, out ComplexExpressionNode complex, out error)) {
-                    node = complex;
+            if (parseComplex && TryParseOperator(out BinaryOperatorNode op)) {
+                if (ParseComplexExpression(node, op, out node, out error)) {
                     return true;
                 }
 
@@ -148,21 +150,45 @@ namespace ExpressionCompiler.Syntax
             return true;
         }
 
-        private bool TryParseComplexExpression(Node firstNode, out ComplexExpressionNode complex, out string error)
+        private bool TryParseRelationalExpression(out Node node)
+        {
+            node = null;
+
+            if (!TryParseOperator(out BinaryOperatorNode op)) {
+                return false;
+            }
+
+            if (op.OperatorCategory != OperatorType.Boolean) {
+                return false;
+            }
+
+            if (!ParseNode(parseComplex: true, out Node n, out _)) {
+                return false;
+            }
+
+            node = new RelationalNode(op, n);
+            return true;
+        }
+
+        private bool ParseComplexExpression(Node firstNode, BinaryOperatorNode firstOperator, out Node complex, out string error)
         {
             complex = null;
-            error = null;
+            var nodes = new List<Node> { firstNode, firstOperator };
 
-            var nodes = new List<Node> { firstNode };
+            if (!ParseNode(parseComplex: false, out Node node, out error)) {
+                return false;
+            }
+
+            nodes.Add(node);
 
             while (window.HasItem && !ParserUtils.IsExpressionTerminator(window.Current)) {
-                if (!TryParseOperator(out BinaryOperatorNode op, out error)) {
+                if (!ParseOperator(out BinaryOperatorNode op, out error)) {
                     return false;
                 }
 
                 nodes.Add(op);
 
-                if (!TryParseNode(parseComplex: false, out Node n, out error)) {
+                if (!ParseNode(parseComplex: false, out Node n, out error)) {
                     return false;
                 }
 
@@ -173,38 +199,35 @@ namespace ExpressionCompiler.Syntax
             return true;
         }
 
-        private bool TryParseOperator(out BinaryOperatorNode op, out string error)
+        private bool TryParseOperator(out BinaryOperatorNode op)
         {
             op = null;
-            error = null;
+            Token t1 = window.Current;
+            Token t2 = window.Peek();
 
-            string opValue = window.Current.Value;
-            string next = window.Next.Value;
-
-            if (next.Length == 1) {
-                string combined = opValue + next;
-
-                if (ParserUtils.IsCompoundOperator(combined)) {
-                    window.Advance();
-                    window.Advance();
-                    op = new BinaryOperatorNode(combined);
-
-                    return true;
-                }
+            if (ParserUtils.IsOperator(t1, t2)) {
+                op = new BinaryOperatorNode(t1 + t2);
+                window.Advance(2);
+            } else if (ParserUtils.IsOperator(t1)) {
+                op = new BinaryOperatorNode(t1);
+                window.Advance();
             }
 
-            if (!ParserUtils.IsOperator(opValue)) {
-                error = $"Unexpected token '{opValue}' was encountered by the parser; expected operator.";
+            return op is not null;
+        }
+
+        private bool ParseOperator(out BinaryOperatorNode op, out string error)
+        {
+            if (!TryParseOperator(out op)) {
+                error = $"Unexpected token '{window.Current}' was encountered by the parser; expected operator.";
                 return false;
             }
 
-            window.Advance();
-
-            op = new BinaryOperatorNode(opValue);
+            error = null;
             return true;
         }
 
-        private bool TryParseFunctionArguments(string functionName, out List<Node> arguments, out string error)
+        private bool ParseFunctionArguments(string functionName, out List<Node> arguments, out string error)
         {
             arguments = null;
             error = null;
@@ -218,7 +241,7 @@ namespace ExpressionCompiler.Syntax
             var args = new List<Node>();
 
             while (window.HasItem && window.Current.Kind != TokenKind.RParen) {
-                if (!TryParseNode(parseComplex: true, out Node node, out error)) {
+                if (!ParseNode(parseComplex: true, out Node node, out error)) {
                     return false;
                 }
 

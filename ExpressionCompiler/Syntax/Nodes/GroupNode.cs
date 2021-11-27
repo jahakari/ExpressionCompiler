@@ -10,8 +10,8 @@ namespace ExpressionCompiler.Syntax.Nodes
         }
 
         public override NodeType NodeType => NodeType.Group;
-
         public override NodeValueType ValueType => Inner.ValueType;
+        public override SemanticType SemanticType => SemanticType.Value;
 
         public Node Inner { get; }
 
